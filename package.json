@@ -1,0 +1,66 @@
+{
+  "name": "easydarwin",
+  "version": "9.0.0",
+  "description": "go-rtsp-server Open Source Media Server",
+  "main": "index.js",
+  "scripts": {
+    "build:ico": "rsrc -arch amd64 -ico ed.ico -o go-rtsp-server_windows.syso",
+    "build:www": "cd web_src && npm run build && cd .. && apidoc -i routers -o www/apidoc",
+    "build:doc": "apidoc -i routers -o www/apidoc",
+    "build:win": "go build -tags release -ldflags \"-s -w\" -o go-rtsp-server.exe",
+    "build:lin": "go build -tags release -ldflags \"-X 'main.buildDateTime=$(date '+%Y-%m-%d %H:%M:%S')' -X 'main.gitCommitCode=$(git rev-list --full-history --all --abbrev-commit --max-count 1)' -s -w\" -o easydarwin",
+    "build:dev": "go build -o go-rtsp-server.exe",
+    "dev": "gobuild -o go-rtsp-server.exe",
+    "dev:lin": "gobuild -o easydarwin",
+    "dev:www": "cd web_src && npm run start",
+    "clean": "rimraf go-rtsp-server.exe go-rtsp-server.exe~ easydarwin"
+  },
+  "apidoc": {
+    "name": "go-rtsp-server",
+    "title": "go-rtsp-server API Reference",
+    "order": [
+      "stats",
+      "Pushers",
+      "ers",
+      "stream",
+      "StreamStart",
+      "StreamStop",
+      "record",
+      "RecordFolders",
+      "RecordFiles",
+      "sys",
+      "Login",
+      "Logout",
+      "GetUserInfo",
+      "ModifyPassword",
+      "GetServerInfo"
+    ]
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "pack": [
+    {
+      "name": "go-rtsp-server-windows",
+      "format": "zip",
+      "pattern": "{www/**,go-rtsp-server.exe,ServiceInstall-go-rtsp-server.exe,ServiceUninstall-go-rtsp-server.exe,easydarwin.ini}",
+      "options": {
+        "dot": true,
+        "ignore": [
+          "*.log"
+        ]
+      }
+    },
+    {
+      "name": "go-rtsp-server-linux",
+      "format": "tar",
+      "pattern": "{www/**,easydarwin,easydarwin.ini,*.sh}",
+      "options": {
+        "dot": true,
+        "ignore": [
+          "*.log"
+        ]
+      }
+    }
+  ]
+}
