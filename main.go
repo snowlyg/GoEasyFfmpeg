@@ -7,15 +7,14 @@ import (
 	stream_chan2 "github.com/snowlyg/go-rtsp-server/stream_chan"
 	"log"
 	"net/http"
-	"os/exec"
 	"strings"
-	"syscall"
 	"time"
 
 	"github.com/snowlyg/go-rtsp-server/extend/db"
 
 	figure "github.com/common-nighthawk/go-figure"
-	"github.com/snowlyg/go-rtsp-server/extend/service"
+	"github.com/go-cmd/cmd"
+	"github.com/kardianos/service"
 	"github.com/snowlyg/go-rtsp-server/extend/utils"
 	"github.com/snowlyg/go-rtsp-server/models"
 	"github.com/snowlyg/go-rtsp-server/routers"
@@ -99,7 +98,7 @@ func (p *program) Start(s service.Service) (err error) {
 	stream_chan := stream_chan2.GetStreamChan()
 	go func() {
 		log.Println("log files -->", 2222)
-		pusher2ffmpegMap := make(map[*models.Stream]*exec.Cmd)
+		pusher2ffmpegMap := make(map[*models.Stream]*cmd.Cmd)
 		var stream *models.Stream
 		addChnOk := true
 		removeChnOk := true
@@ -111,15 +110,26 @@ func (p *program) Start(s service.Service) (err error) {
 					if stream.Status {
 						//	ffmpeg -i rtsp://localhost:8554/original -c:v libx264 -preset ultrafast -tune zerolatency -b 600k -f rtsp rtsp://localhost:8554/compressed
 						path := fmt.Sprintf("rtsp://%v:%v%v", utils.LocalIP(), pathIp, stream.CustomPath)
-						params := []string{"-d", "-i", stream.URL, "-c:v", "libx264", " -preset", "ultrafast", "-tune", "zerolatency", "-b", "600k", "-f", "rtsp", path}
+						params := []string{"-i", stream.URL, "-c:v", "libx264", "-preset", "ultrafast", "-tune", "zerolatency", "-b", "600k", "-f", "rtsp", path}
 
-						cmd := exec.Command(ffmpeg, params...)
-						err = cmd.Start()
-						if err != nil {
-							log.Printf("Start ffmpeg err:%v", err)
-						}
-						pusher2ffmpegMap[stream] = cmd
-						log.Printf("add ffmpeg [%v] to pull stream from pusher[%v]", cmd, stream)
+						findCmd := cmd.NewCmd(ffmpeg, params...)
+						statusChan := findCmd.Start() // non-blocking
+						finalStatus := <-statusChan
+
+						ticker := time.NewTicker(2 * time.Second)
+
+						//Print last line of stdout every 2s
+						go func() {
+							for range ticker.C {
+								// Print each line of STDOUT from Cmd
+								for _, line := range finalStatus.Stdout {
+									fmt.Println(line)
+								}
+							}
+						}()
+
+						pusher2ffmpegMap[stream] = findCmd
+						log.Printf("add ffmpeg [%v] to pull stream from pusher[%v]", findCmd, statusChan)
 					}
 				} else {
 					log.Printf("addPusherChan closed")
@@ -127,33 +137,18 @@ func (p *program) Start(s service.Service) (err error) {
 			case stream, removeChnOk = <-stream_chan.RemovePusherCh:
 				if removeChnOk {
 					if !stream.Status {
-						cmd := pusher2ffmpegMap[stream]
-						proc := cmd.Process
-						if proc != nil {
-							log.Printf("prepare to SIGTERM to process:%v", proc)
-							proc.Signal(syscall.SIGTERM)
-							proc.Wait()
-							// proc.Kill()
-							// no need to close attached log file.
-							// see "Wait releases any resources associated with the Cmd."
-							// if closer, ok := cmd.Stdout.(io.Closer); ok {
-							// 	closer.Close()
-							// 	logger.Printf("process:%v Stdout closed.", proc)
-							// }
-							log.Printf("process:%v terminate.", proc)
+						findCmd := pusher2ffmpegMap[stream]
+						if findCmd != nil {
+							findCmd.Stop()
 						}
 						delete(pusher2ffmpegMap, stream)
 						log.Printf("delete ffmpeg from pull stream from pusher[%v]", stream)
 					}
 				} else {
-					for _, cmd := range pusher2ffmpegMap {
-						proc := cmd.Process
-						if proc != nil {
-							log.Printf("prepare to SIGTERM to process:%v", proc)
-							proc.Signal(syscall.SIGTERM)
-						}
+					for _, findCmd := range pusher2ffmpegMap {
+						findCmd.Stop()
 					}
-					pusher2ffmpegMap = make(map[*models.Stream]*exec.Cmd)
+					pusher2ffmpegMap = make(map[*models.Stream]*cmd.Cmd)
 					log.Printf("removePusherChan closed")
 				}
 			}

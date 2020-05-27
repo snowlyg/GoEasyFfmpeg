@@ -13,6 +13,7 @@ require (
 	github.com/gin-contrib/pprof v1.3.0
 	github.com/gin-contrib/static v0.0.0-20191128031702-f81c604d8ac2
 	github.com/gin-gonic/gin v1.6.3
+	github.com/go-cmd/cmd v1.2.0
 	github.com/go-ini/ini v1.56.0
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/go-redis/redis v6.15.8+incompatible
@@ -22,6 +23,7 @@ require (
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869 // indirect
 	github.com/jinzhu/gorm v1.9.12
 	github.com/jonboulle/clockwork v0.1.0 // indirect
+	github.com/kardianos/service v1.0.0
 	github.com/lestrrat-go/file-rotatelogs v2.3.0+incompatible
 	github.com/lestrrat-go/strftime v1.0.1 // indirect
 	github.com/onsi/ginkgo v1.12.2 // indirect
@@ -30,7 +32,7 @@ require (
 	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/tebeka/strftime v0.1.4 // indirect
 	github.com/teris-io/shortid v0.0.0-20171029131806-771a37caa5cf
-	golang.org/x/sys v0.0.0-20200523222454-059865788121
+	golang.org/x/sys v0.0.0-20200523222454-059865788121 // indirect
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	gopkg.in/go-playground/validator.v8 v8.18.2
 	gopkg.in/ini.v1 v1.56.0 // indirect
