@@ -2,8 +2,8 @@ package routers
 
 import (
 	"fmt"
-	"github.com/snowlyg/go-rtsp-server/extend/db"
-	"github.com/snowlyg/go-rtsp-server/extend/utils"
+	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/db"
+	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/utils"
 	"log"
 	"net/http"
 	"runtime"
@@ -15,6 +15,7 @@ import (
 	"github.com/shirou/gopsutil/mem"
 	"github.com/snowlyg/go-rtsp-server/extend/sessions"
 	"github.com/snowlyg/go-rtsp-server/models"
+	"github.com/snowlyg/go-rtsp-server/rtsp"
 )
 
 /**
@@ -49,8 +50,11 @@ func init() {
 				now := utils.DateTime(time.Now())
 				memData = append(memData, PercentData{Time: now, Used: mem.UsedPercent / 100})
 				cpuData = append(cpuData, PercentData{Time: now, Used: cpu[0] / 100})
+				pusherData = append(pusherData, CountData{Time: now, Total: uint(rtsp.Instance.GetPusherSize())})
 				playerCnt := 0
-
+				for _, pusher := range rtsp.Instance.GetPushers() {
+					playerCnt += len(pusher.GetPlayers())
+				}
 				playerData = append(playerData, CountData{Time: now, Total: uint(playerCnt)})
 
 				if len(memData) > timeSize {
@@ -109,7 +113,7 @@ func (h *APIHandler) GetServerInfo(c *gin.Context) {
 		"InterfaceVersion": "V1",
 		"RunningTime":      utils.UpTimeString(),
 		"StartUpTime":      utils.DateTime(utils.StartTime),
-		"Server":           fmt.Sprintf("%s/%s,%s (Platform/%s;)", "go-rtsp-server", BuildDateTime, BuildVersion, strings.Title(runtime.GOOS)),
+		"Server":           fmt.Sprintf("%s/%s,%s (Platform/%s;)", "EasyDarwin", BuildDateTime, BuildVersion, strings.Title(runtime.GOOS)),
 		"memData":          memData,
 		"cpuData":          cpuData,
 		"pusherData":       pusherData,

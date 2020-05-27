@@ -1,7 +1,7 @@
 {
   "name": "easydarwin-web-src",
   "version": "1.0.0",
-  "description": "go-rtsp-server Web Page",
+  "description": "EasyDarwin Web Page",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -9,7 +9,7 @@
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
   },
   "keywords": [
-    "go-rtsp-server"
+    "EasyDarwin"
   ],
   "author": "penggy",
   "license": "ISC",

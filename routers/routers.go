@@ -7,14 +7,14 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"github.com/snowlyg/go-rtsp-server/extend/db"
+	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/db"
 
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/penggy/cors"
+	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/utils"
 	"github.com/snowlyg/go-rtsp-server/extend/sessions"
-	"github.com/snowlyg/go-rtsp-server/extend/utils"
 	validator "gopkg.in/go-playground/validator.v8"
 )
 
@@ -93,6 +93,7 @@ func Errors() gin.HandlerFunc {
 	}
 }
 
+// NeedLogin 登录认证
 func NeedLogin() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if sessions.Default(c).Get("uid") == nil {
@@ -111,9 +112,12 @@ func Init() (err error) {
 	Router.Use(Errors())
 	Router.Use(cors.Default())
 
-	store := sessions.NewGormStoreWithOptions(db.SQLite, sessions.GormStoreOptions{
-		TableName: "t_sessions",
-	}, []byte("go-rtsp-server@2020"))
+	store := sessions.NewGormStoreWithOptions(
+		db.SQLite, sessions.GormStoreOptions{
+			TableName: "t_sessions",
+		},
+		[]byte("EasyDarwin@2020"),
+	)
 	tokenTimeout := utils.Conf().Section("http").Key("token_timeout").MustInt(7 * 86400)
 	store.Options(sessions.Options{HttpOnly: true, MaxAge: tokenTimeout, Path: "/"})
 	sessionHandle := sessions.Sessions("token", store)

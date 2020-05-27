@@ -3,12 +3,14 @@ package routers
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/snowlyg/go-rtsp-server/extend/db"
+	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/db"
 	"github.com/snowlyg/go-rtsp-server/models"
-	stream_chan2 "github.com/snowlyg/go-rtsp-server/stream_chan"
+	"github.com/snowlyg/go-rtsp-server/rtsp"
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
 )
 
 /**
@@ -28,10 +30,13 @@ import (
  */
 func (h *APIHandler) StreamAdd(c *gin.Context) {
 	type Form struct {
-		Id         uint   `form:"id" `
-		URL        string `form:"source" binding:"required"`
-		CustomPath string `form:"customPath"`
-		OutIp      string `form:"outIp"`
+		Id                uint   `form:"id" `
+		URL               string `form:"source" binding:"required"`
+		CustomPath        string `form:"customPath"`
+		TransType         string `form:"transType"`
+		TransRtpType      string `form:"transRtpType"`
+		IdleTimeout       int    `form:"idleTimeout"`
+		HeartbeatInterval int    `form:"heartbeatInterval"`
 	}
 	var form Form
 	err := c.Bind(&form)
@@ -40,22 +45,35 @@ func (h *APIHandler) StreamAdd(c *gin.Context) {
 		return
 	}
 
+	transType := 0
+	if form.TransType == "TCP" {
+		transType = 0
+	} else if form.TransType == "UDP" {
+		transType = 1
+	}
+
 	// save to db.
 	oldStream := models.Stream{}
 	if db.SQLite.Where("id = ? ", form.Id).First(&oldStream).RecordNotFound() {
 
 		stream := models.Stream{
-			URL:        form.URL,
-			CustomPath: form.CustomPath,
-			OutIp:      form.OutIp,
-			Status:     false,
+			URL:               form.URL,
+			CustomPath:        form.CustomPath,
+			IdleTimeout:       form.IdleTimeout,
+			TransType:         transType,
+			TransRtpType:      form.TransRtpType,
+			HeartbeatInterval: form.HeartbeatInterval,
+			Status:            false,
 		}
 		db.SQLite.Create(&stream)
 		c.IndentedJSON(200, stream)
 	} else {
 		oldStream.URL = form.URL
 		oldStream.CustomPath = form.CustomPath
-		oldStream.OutIp = form.OutIp
+		oldStream.TransType = transType
+		oldStream.TransRtpType = form.TransRtpType
+		oldStream.IdleTimeout = form.IdleTimeout
+		oldStream.HeartbeatInterval = form.HeartbeatInterval
 		oldStream.Status = false
 		db.SQLite.Save(oldStream)
 		c.IndentedJSON(200, oldStream)
@@ -71,6 +89,7 @@ func (h *APIHandler) StreamAdd(c *gin.Context) {
  * @apiUse simpleSuccess
  */
 func (h *APIHandler) StreamStop(c *gin.Context) {
+
 	type Form struct {
 		ID string `form:"id" binding:"required"`
 	}
@@ -83,19 +102,23 @@ func (h *APIHandler) StreamStop(c *gin.Context) {
 	}
 
 	stream := getStream(form.ID)
-	stream.Status = false
-	db.SQLite.Save(stream)
-
-	if !stream.Status {
-		stream_chan := stream_chan2.GetStreamChan()
-		stream_chan.RemovePusherCh <- &stream
+	pushers := rtsp.GetServer().GetPushers()
+	for _, v := range pushers {
+		//if v.URL() == stream.URL {
+		v.Stop()
+		rtsp.GetServer().RemovePusher(v)
 		c.IndentedJSON(200, "OK")
-		log.Printf("Start %v success ", stream)
+		log.Printf("Stop %v success ", v)
+		//if v.RTSPClient != nil {
+		stream.Status = false
+		stream.StreamId = ""
+		db.SQLite.Save(stream)
+		//}
 		return
+		//}
 	}
 
-	c.AbortWithStatusJSON(http.StatusBadRequest, fmt.Sprintf("Pusher[%s] not found", stream.URL))
-	return
+	c.AbortWithStatusJSON(http.StatusBadRequest, fmt.Sprintf("Pusher[%s] not found", stream.StreamId))
 }
 
 func getStream(formId string) models.Stream {
@@ -126,19 +149,31 @@ func (h *APIHandler) StreamStart(c *gin.Context) {
 	}
 
 	stream := getStream(form.ID)
-	stream.Status = true
-	db.SQLite.Save(stream)
-	if stream.Status {
-		stream_chan := stream_chan2.GetStreamChan()
-		stream_chan.AddPusherCh <- &stream
-		c.IndentedJSON(200, "OK")
-		log.Printf("Start %v success ", stream)
-		return
+	agent := fmt.Sprintf("EasyDarwinGo/%s", BuildVersion)
+	if BuildDateTime != "" {
+		agent = fmt.Sprintf("%s(%s)", agent, BuildDateTime)
 	}
 
-	c.AbortWithStatusJSON(http.StatusBadRequest, fmt.Sprintf("Pusher[%s] not found", stream.URL))
-	return
+	p := rtsp.GetServer().GetPusher(stream.URL)
+	if p != nil {
+		rtsp.GetServer().RemovePusher(p)
+	}
 
+	pusher := rtsp.NewClientPusher()
+
+	log.Printf("Pull to push %v success ", stream.StreamId)
+	rtsp.GetServer().AddPusher(pusher)
+
+	//if pusher.RTSPClient != nil && !pusher.Stoped() {
+	stream.StreamId = pusher.ID()
+	stream.Status = true
+	db.SQLite.Save(stream)
+	c.IndentedJSON(200, "OK")
+	log.Printf("Start %v success ", pusher)
+	return
+	//}
+
+	c.AbortWithStatusJSON(http.StatusBadRequest, fmt.Sprintf("Pusher[%s] not found or not start", form.ID))
 }
 
 /**

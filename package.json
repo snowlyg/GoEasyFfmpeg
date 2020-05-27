@@ -1,23 +1,23 @@
 {
   "name": "easydarwin",
   "version": "9.0.0",
-  "description": "go-rtsp-server Open Source Media Server",
+  "description": "EasyDarwin Open Source Media Server",
   "main": "index.js",
   "scripts": {
-    "build:ico": "rsrc -arch amd64 -ico ed.ico -o go-rtsp-server_windows.syso",
+    "build:ico": "rsrc -arch amd64 -ico ed.ico -o EasyDarwin_windows.syso",
     "build:www": "cd web_src && npm run build && cd .. && apidoc -i routers -o www/apidoc",
     "build:doc": "apidoc -i routers -o www/apidoc",
-    "build:win": "go build  -ldflags \"-s -w\" -o go-rtsp-server.exe",
-    "build:lin": "go build  -ldflags \"-X 'main.buildDateTime=$(date '+%Y-%m-%d %H:%M:%S')' -X 'main.gitCommitCode=$(git rev-list --full-history --all --abbrev-commit --max-count 1)' -s -w\" -o easydarwin",
-    "build:dev": "go build -o go-rtsp-server.exe",
-    "dev": "gobuild -o go-rtsp-server.exe",
+    "build:win": "go build -tags release -ldflags \"-s -w\" -o EasyDarwin.exe",
+    "build:lin": "go build -tags release -ldflags \"-X 'main.buildDateTime=$(date '+%Y-%m-%d %H:%M:%S')' -X 'main.gitCommitCode=$(git rev-list --full-history --all --abbrev-commit --max-count 1)' -s -w\" -o easydarwin",
+    "build:dev": "go build -o EasyDarwin.exe",
+    "dev": "gobuild -o EasyDarwin.exe",
     "dev:lin": "gobuild -o easydarwin",
     "dev:www": "cd web_src && npm run start",
-    "clean": "rimraf go-rtsp-server.exe go-rtsp-server.exe~ easydarwin"
+    "clean": "rimraf EasyDarwin.exe EasyDarwin.exe~ easydarwin"
   },
   "apidoc": {
-    "name": "go-rtsp-server",
-    "title": "go-rtsp-server API Reference",
+    "name": "EasyDarwin",
+    "title": "EasyDarwin API Reference",
     "order": [
       "stats",
       "Pushers",
@@ -41,9 +41,9 @@
   "license": "ISC",
   "pack": [
     {
-      "name": "go-rtsp-server-windows",
+      "name": "EasyDarwin-windows",
       "format": "zip",
-      "pattern": "{www/**,go-rtsp-server.exe,ServiceInstall-go-rtsp-server.exe,ServiceUninstall-go-rtsp-server.exe,easydarwin.ini}",
+      "pattern": "{www/**,EasyDarwin.exe,ServiceInstall-EasyDarwin.exe,ServiceUninstall-EasyDarwin.exe,easydarwin.ini}",
       "options": {
         "dot": true,
         "ignore": [
@@ -52,7 +52,7 @@
       }
     },
     {
-      "name": "go-rtsp-server-linux",
+      "name": "EasyDarwin-linux",
       "format": "tar",
       "pattern": "{www/**,easydarwin,easydarwin.ini,*.sh}",
       "options": {

@@ -1,7 +1,7 @@
 .vscode
 /easydarwin
-/go-rtsp-server.exe
-/go-rtsp-server.exe~
+/EasyDarwin.exe
+/EasyDarwin.exe~
 /logs
 /*.log
 node_modules
@@ -20,4 +20,4 @@ debug
 debug.ini
 easydarwin.ini
 www/
-go-rtsp-serverGoM3u8/
+EasyDarwinGoM3u8/

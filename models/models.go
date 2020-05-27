@@ -1,8 +1,8 @@
 package models
 
 import (
-	"github.com/snowlyg/go-rtsp-server/extend/db"
-	"github.com/snowlyg/go-rtsp-server/extend/utils"
+	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/db"
+	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/utils"
 )
 
 func Init() (err error) {

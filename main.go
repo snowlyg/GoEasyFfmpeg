@@ -4,20 +4,19 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	stream_chan2 "github.com/snowlyg/go-rtsp-server/stream_chan"
 	"log"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/snowlyg/go-rtsp-server/extend/db"
+	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/db"
 
 	figure "github.com/common-nighthawk/go-figure"
-	"github.com/go-cmd/cmd"
 	"github.com/kardianos/service"
-	"github.com/snowlyg/go-rtsp-server/extend/utils"
+	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/utils"
 	"github.com/snowlyg/go-rtsp-server/models"
 	"github.com/snowlyg/go-rtsp-server/routers"
+	"github.com/snowlyg/go-rtsp-server/rtsp"
 )
 
 var (
@@ -28,8 +27,11 @@ var (
 type program struct {
 	httpPort   int
 	httpServer *http.Server
+	//rtspPort   int
+	rtspServer *rtsp.Server
 }
 
+// StopHTTP 停止 http
 func (p *program) StopHTTP() (err error) {
 	if p.httpServer == nil {
 		err = fmt.Errorf("HTTP Server Not Found")
@@ -43,6 +45,7 @@ func (p *program) StopHTTP() (err error) {
 	return
 }
 
+// StartHTTP 启动 http
 func (p *program) StartHTTP() (err error) {
 	p.httpServer = &http.Server{
 		Addr:              fmt.Sprintf(":%d", p.httpPort),
@@ -60,6 +63,38 @@ func (p *program) StartHTTP() (err error) {
 	return
 }
 
+// StartRTSP 启动 rtsp
+func (p *program) StartRTSP() (err error) {
+	if p.rtspServer == nil {
+		err = fmt.Errorf("RTSP Server Not Found")
+		return
+	}
+	//sport := ""
+	//if p.rtspPort != 554 {
+	//	sport = fmt.Sprintf(":%d", p.rtspPort)
+	//}
+	//link := fmt.Sprintf("rtsp://%s%s", utils.LocalIP(), sport)
+	//log.Println("rtsp server start -->", link)
+	go func() {
+		if err := p.rtspServer.Start(); err != nil {
+			log.Println("start rtsp server error", err)
+		}
+		log.Println("rtsp server end")
+	}()
+	return
+}
+
+// StopRTSP 停止 rtsp
+func (p *program) StopRTSP() (err error) {
+	if p.rtspServer == nil {
+		err = fmt.Errorf("RTSP Server Not Found")
+		return
+	}
+	p.rtspServer.Stop()
+	return
+}
+
+// Start 启动服务
 func (p *program) Start(s service.Service) (err error) {
 
 	log.Println("********** START **********")
@@ -67,98 +102,43 @@ func (p *program) Start(s service.Service) (err error) {
 		err = fmt.Errorf("HTTP port[%d] In Use", p.httpPort)
 		return
 	}
-
+	//if utils.IsPortInUse(p.rtspPort) {
+	//	err = fmt.Errorf("RTSP port[%d] In Use", p.rtspPort)
+	//	return
+	//}
+	// 初始化数据库和模型
 	err = models.Init()
 	if err != nil {
 		return
 	}
+	// 初始化路由
 	err = routers.Init()
 	if err != nil {
 		return
 	}
 
+	_ = p.StartRTSP()
 	_ = p.StartHTTP()
 
 	if !utils.Debug {
 		log.Println("log files -->", utils.LogDir())
 		log.SetOutput(utils.GetLogWriter())
 	}
-
 	go func() {
 		for range routers.API.RestartChan {
 			_ = p.StopHTTP()
+			_ = p.StopRTSP()
+			// 重载配置
 			utils.ReloadConf()
+			_ = p.StartRTSP()
 			_ = p.StartHTTP()
 		}
 	}()
 
-	ffmpeg := utils.Conf().Section("rtsp").Key("ffmpeg_path").MustString("ffmpeg")
-	stream_chan := stream_chan2.GetStreamChan()
 	go func() {
-		log.Println("log files -->", 2222)
-		pusher2ffmpegMap := make(map[*models.Stream]*cmd.Cmd)
-		var stream *models.Stream
-		addChnOk := true
-		removeChnOk := true
-		for addChnOk || removeChnOk {
-			select {
-			case stream, addChnOk = <-stream_chan.AddPusherCh:
-				log.Println("addChnOk -->", stream, addChnOk)
-				if addChnOk {
-					if stream.Status {
-						//	ffmpeg -i rtsp://localhost:8554/original -c:v libx264 -preset ultrafast -tune zerolatency -b 600k -f rtsp rtsp://localhost:8554/compressed
-
-						url := stream.GetUrl()
-						s2 := "rtsp"
-						if strings.Contains(url, "rtmp://") {
-							s2 = "flv"
-						}
-
-						params := []string{"-re", "-i", stream.URL, "-strict", "-2", "-vcodec", "libx264", "-max_delay", "100", "-acodec", "aac", "-f", s2, "-g", "5", "-b:a", "700000k", url}
-						findCmd := cmd.NewCmd(ffmpeg, params...)
-						statusChan := findCmd.Start() // non-blocking
-						finalStatus := <-statusChan
-
-						ticker := time.NewTicker(2 * time.Second)
-
-						//Print last line of stdout every 2s
-						go func() {
-							for range ticker.C {
-								// Print each line of STDOUT from Cmd
-								for _, line := range finalStatus.Stdout {
-									fmt.Println(line)
-								}
-							}
-						}()
-
-						pusher2ffmpegMap[stream] = findCmd
-						log.Printf("add ffmpeg [%v] to pull stream from pusher[%v]", findCmd, statusChan)
-					}
-				} else {
-					log.Printf("addPusherChan closed")
-				}
-			case stream, removeChnOk = <-stream_chan.RemovePusherCh:
-				if removeChnOk {
-					if !stream.Status {
-						findCmd := pusher2ffmpegMap[stream]
-						if findCmd != nil {
-							findCmd.Stop()
-						}
-						delete(pusher2ffmpegMap, stream)
-						log.Printf("delete ffmpeg from pull stream from pusher[%v]", stream)
-					}
-				} else {
-					for _, findCmd := range pusher2ffmpegMap {
-						findCmd.Stop()
-					}
-					pusher2ffmpegMap = make(map[*models.Stream]*cmd.Cmd)
-					log.Printf("removePusherChan closed")
-				}
-			}
-		}
-
 		log.Printf("demon pull streams")
 		for {
+
 			var streams []models.Stream
 			if err := db.SQLite.Find(&streams).Error; err != nil {
 				log.Printf("find stream err:%v", err)
@@ -166,11 +146,58 @@ func (p *program) Start(s service.Service) (err error) {
 			}
 
 			for i := len(streams) - 1; i > -1; i-- {
-				//v := streams[i]
-				agent := fmt.Sprintf("go-rtsp-serverGo/%s", routers.BuildVersion)
+				v := streams[i]
+				agent := fmt.Sprintf("EasyDarwinGo/%s", routers.BuildVersion)
 				if routers.BuildDateTime != "" {
 					agent = fmt.Sprintf("%s(%s)", agent, routers.BuildDateTime)
 				}
+
+				//client, err := rtsp.NewRTSPClient(rtsp.GetServer(), v.URL, int64(v.HeartbeatInterval)*1000, agent, v.TransRtpType)
+				//if err != nil {
+				//	continue
+				//}
+				//
+				//client.CustomPath = v.CustomPath
+				//switch v.TransType {
+				//case 1:
+				//	client.TransType = rtsp.TRANS_TYPE_UDP
+				//case 0:
+				//	client.TransType = rtsp.TRANS_TYPE_TCP
+				//default:
+				//	client.TransType = rtsp.TRANS_TYPE_TCP
+				//}
+
+				pusher := rtsp.NewClientPusher()
+				if rtsp.GetServer().GetPusher(pusher.Path()) != nil {
+					continue
+				}
+				if v.Status {
+					//err, newPath := client.Start(time.Duration(v.IdleTimeout) * time.Second)
+					//if newPath != "" {
+					//client, err = rtsp.NewRTSPClient(rtsp.GetServer(), newPath, int64(v.HeartbeatInterval)*1000, agent, v.TransRtpType)
+					//client.CustomPath = v.CustomPath
+					//switch v.TransType {
+					//case 1:
+					//	client.TransType = rtsp.TRANS_TYPE_UDP
+					//case 0:
+					//	client.TransType = rtsp.TRANS_TYPE_TCP
+					//default:
+					//	client.TransType = rtsp.TRANS_TYPE_TCP
+					//}
+					//	err, newPath = client.Start(time.Duration(v.IdleTimeout) * time.Second)
+					//	if err != nil {
+					//		log.Printf("Pull stream err :%v", err)
+					//		return
+					//	}
+					//}
+					//if err != nil {
+					//	log.Printf("Pull stream err :%v", err)
+					//	return
+					//}
+					rtsp.GetServer().AddPusher(pusher)
+				}
+				//streams = streams[0:i]
+				//streams = append(streams[:i], streams[i+1:]...)
 			}
 			time.Sleep(2 * time.Second)
 		}
@@ -178,10 +205,12 @@ func (p *program) Start(s service.Service) (err error) {
 	return
 }
 
+// Stop 停止服务
 func (p *program) Stop(s service.Service) (err error) {
 	defer log.Println("********** STOP **********")
 	defer utils.CloseLogWriter()
-	p.StopHTTP()
+	_ = p.StopHTTP()
+	_ = p.StopRTSP()
 	models.Close()
 	return
 }
@@ -193,7 +222,7 @@ func main() {
 	tail := flag.Args()
 
 	// log
-	log.SetPrefix("[go-rtsp-server] ")
+	log.SetPrefix("[EasyDarwin] ")
 	log.SetFlags(log.Lshortfile | log.LstdFlags)
 
 	log.Printf("git commit code:%s", gitCommitCode)
@@ -204,25 +233,27 @@ func main() {
 
 	sec := utils.Conf().Section("service")
 	svcConfig := &service.Config{
-		Name:        sec.Key("name").MustString("go-rtsp-server_Service"),
-		DisplayName: sec.Key("display_name").MustString("go-rtsp-server_Service"),
-		Description: sec.Key("description").MustString("go-rtsp-server_Service"),
+		Name:        sec.Key("name").MustString("EasyDarwin_Service"),
+		DisplayName: sec.Key("display_name").MustString("EasyDarwin_Service"),
+		Description: sec.Key("description").MustString("EasyDarwin_Service"),
 	}
 
 	httpPort := utils.Conf().Section("http").Key("port").MustInt(10008)
+	rtspServer := rtsp.GetServer()
 	p := &program{
 		httpPort: httpPort,
+		//rtspPort:   rtspServer.TCPPort,
+		rtspServer: rtspServer,
 	}
 	s, err := service.New(p, svcConfig)
 	if err != nil {
 		log.Println(err)
 		utils.PauseExit()
 	}
-
 	if len(tail) > 0 {
 		cmd := strings.ToLower(tail[0])
 		if cmd == "install" || cmd == "stop" || cmd == "start" || cmd == "uninstall" {
-			figure.NewFigure("go-rtsp-server", "", false).Print()
+			figure.NewFigure("EasyDarwin", "", false).Print()
 			log.Println(svcConfig.Name, cmd, "...")
 			if err = service.Control(s, cmd); err != nil {
 				log.Println(err)
@@ -232,7 +263,7 @@ func main() {
 			return
 		}
 	}
-	figure.NewFigure("go-rtsp-server", "", false).Print()
+	figure.NewFigure("EasyDarwin", "", false).Print()
 	if err = s.Run(); err != nil {
 		log.Println(err)
 		utils.PauseExit()

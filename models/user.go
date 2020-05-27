@@ -2,7 +2,7 @@ package models
 
 import (
 	"github.com/jinzhu/gorm"
-	"github.com/snowlyg/go-rtsp-server/extend/utils"
+	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/utils"
 )
 
 type User struct {

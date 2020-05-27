@@ -1,7 +1,7 @@
 <template>
   <div class="login-box">
     <div class="login-logo text-success">
-        <b>go-rtsp-server 登录</b>
+        <b>EasyDarwin 登录</b>
     </div>
     <div class="login-box-body">
         <br>

@@ -13,14 +13,40 @@
                 <input type="text" id="input-custom-path" class="form-control" name="customPath" data-vv-as="自定义路径" v-model.trim="form.customPath" placeholder="/your/custom/path">
                 <span class="help-block">{{errors.first('customPath')}}</span>
             </div>
-        </div>
-        <div :class="['form-group', { 'has-error': errors.has('outIp')}]">
-            <label for="input-custom-path" class="col-sm-3 control-label">输出ip地址</label>
+        </div> 
+        <div class="form-group">
+            <label for="input-transport" class="col-sm-3 control-label">传输协议</label>
             <div class="col-sm-8">
-                <input type="text" id="input-out-ip" class="form-control" name="customPath" data-vv-as="输出ip地址" v-model.trim="form.outIp" placeholder="/your/out/id">
-                <span class="help-block">{{errors.first('outIp')}}</span>
+                <el-radio-group id="input-transport" v-model.trim="form.transType" size="mini">
+                    <el-radio-button label="TCP"></el-radio-button>
+                    <el-radio-button label="UDP"></el-radio-button>
+                    <!-- <el-radio-button label="Multicast"></el-radio-button> -->
+                </el-radio-group>
             </div>
         </div>
+        <div class="form-group">
+            <label for="input-transport" class="col-sm-3 control-label">RTP协议</label>
+            <div class="col-sm-8">
+                <el-radio-group id="input-rtp_transport" v-model.trim="form.transRtpType" size="mini">
+                    <el-radio-button label="MP2T"></el-radio-button>
+                    <el-radio-button label="RTP"></el-radio-button>
+                </el-radio-group>
+            </div>
+        </div>
+        <div :class="['form-group', { 'has-error': errors.has('idleTimeout')}]">
+            <label for="input-idle-timeout" class="col-sm-3 control-label">空闲超时(秒)</label>
+            <div class="col-sm-8">
+                <input type="text" id="input-idle-timeout" class="form-control" name="idleTimeout" data-vv-as="空闲超时" v-validate="'numeric'" v-model.trim="form.idleTimeout" placeholder="默认使用系统配置">
+                <span class="help-block">{{errors.first('idleTimeout')}}</span>
+            </div>
+        </div>   
+        <div :class="['form-group', { 'has-error': errors.has('heartbeatInterval')}]">
+            <label for="input-heartbeat-interval" class="col-sm-3 control-label">心跳间隔(秒)</label>
+            <div class="col-sm-8">
+                <input type="text" id="input-heartbeat-interval" class="form-control" name="heartbeatInterval" data-vv-as="心跳间隔" v-validate="'numeric'" v-model.trim="form.heartbeatInterval" placeholder="默认使用系统配置">
+                <span class="help-block">{{errors.first('heartbeatInterval')}}</span>
+            </div>
+        </div>                         
     </FormDlg>
 </template>
 
@@ -44,7 +70,10 @@ export default {
             return {
                 source: '',
                 customPath: '',
-                outIp: '',
+                transType: 'TCP',
+                transRtpType: 'RTP',
+                idleTimeout: '',
+                heartbeatInterval: ''
             }
         },
         onHide() {

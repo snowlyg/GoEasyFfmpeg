@@ -10,7 +10,7 @@
     </div>
     <footer class="main-footer">
       <div class="pull-right hidden-xs hide">
-        go-rtsp-server
+        EasyDarwin
       </div>
       <strong>Copyright &copy; {{ thisYear() }} <a href="http://www.easydarwin.org">www.easydarwin.org</a>.</strong> All rights reserved.
     </footer>

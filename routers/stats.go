@@ -1,13 +1,16 @@
 package routers
 
 import (
-	"github.com/snowlyg/go-rtsp-server/extend/db"
+	"fmt"
+	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/db"
 	"github.com/snowlyg/go-rtsp-server/models"
 	"log"
+	"strings"
 	//"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/snowlyg/go-rtsp-server/extend/utils"
+	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/utils"
+	"github.com/snowlyg/go-rtsp-server/rtsp"
 )
 
 /**
@@ -51,7 +54,8 @@ func (h *APIHandler) Pushers(c *gin.Context) {
 		return
 	}
 
-	//hostname := utils.GetRequestHostname(c.Request)
+	hostname := utils.GetRequestHostname(c.Request)
+
 	var streams []models.Stream
 	if err := db.SQLite.Find(&streams).Error; err != nil {
 		log.Printf("find stream err:%v", err)
@@ -60,20 +64,66 @@ func (h *APIHandler) Pushers(c *gin.Context) {
 
 	pushers := make([]interface{}, 0)
 	for _, stream := range streams {
+		var url string
+		var path string
+		var inBytes int
+		var outBytes int
+		var startAt string
+		var onlines int
 		statusText := "已停止"
-		if stream.Status {
-			statusText = "已启动"
+		streamID := ""
+
+		rIPushers := rtsp.Instance.GetPushers()
+		for _, pusher := range rIPushers {
+			//port := pusher.Server().TCPPort
+
+			//rtspURl := fmt.Sprintf("rtsp://%s:%d%s", hostname, port, pusher.Path())
+			//if port == 554 {
+			//	rtspURl = fmt.Sprintf("rtsp://%s%s", hostname, pusher.Path())
+			//}
+
+			if form.Q != "" && !strings.Contains(strings.ToLower(rtspURl), strings.ToLower(form.Q)) {
+				continue
+			}
+
+			//if stream.URL == pusher.RTSPClient.URL {
+			//	if stream.Status {
+			//		if !pusher.Stoped() {
+			//			statusText = "已启动"
+			//		}
+			//	}
+			//	streamID = stream.StreamId
+			//	startAtTime := utils.DateTime(pusher.StartAt())
+			//	startAt = startAtTime.String()
+			//	url, path, inBytes, outBytes, onlines = rtspURl, pusher.Path(), pusher.InBytes(), pusher.OutBytes(), len(pusher.GetPlayers())
+			//}
 		}
 
-		url := stream.GetUrl()
+		transType := "TCP"
+		if stream.TransType == 0 {
+			transType = "TCP"
+		} else if stream.TransType == 1 {
+			transType = "UDP"
+		}
+
 		pushers = append(pushers, map[string]interface{}{
-			"id":         stream.ID,
-			"source":     stream.URL,
-			"customPath": stream.CustomPath,
-			"outIp":      stream.OutIp,
-			"url":        url,
-			"status":     statusText,
+			"id":                stream.ID,
+			"streamId":          streamID,
+			"url":               url,
+			"path":              path,
+			"source":            stream.URL,
+			"transType":         transType,
+			"transRtpType":      stream.TransRtpType,
+			"inBytes":           inBytes,
+			"outBytes":          outBytes,
+			"startAt":           startAt,
+			"onlines":           onlines,
+			"idleTimeout":       stream.IdleTimeout,
+			"heartbeatInterval": stream.HeartbeatInterval,
+			"customPath":        stream.CustomPath,
+			"status":            statusText,
 		})
+
 	}
 
 	pr := utils.NewPageResult(pushers)
@@ -108,12 +158,30 @@ func (h *APIHandler) Players(c *gin.Context) {
 	if err := c.Bind(form); err != nil {
 		return
 	}
-
+	players := make([]*rtsp.Player, 0)
+	for _, pusher := range rtsp.Instance.GetPushers() {
+		for _, player := range pusher.GetPlayers() {
+			players = append(players, player)
+		}
+	}
 	//hostname := utils.GetRequestHostname(c.Request)
 	_players := make([]interface{}, 0)
-
-	_players = append(_players, map[string]interface{}{})
-
+	for i := 0; i < len(players); i++ {
+		player := players[i]
+		//port := player.Server.TCPPort
+		//rtsp := fmt.Sprintf("rtsp://%s:%d%s", hostname, port, player.Path)
+		//if port == 554 {
+		//	rtsp = fmt.Sprintf("rtsp://%s%s", hostname, player.Path)
+		//}
+		_players = append(_players, map[string]interface{}{
+			"id": player.ID,
+			//"path":      rtsp,
+			"transType": player.TransType.String(),
+			"inBytes":   player.InBytes,
+			"outBytes":  player.OutBytes,
+			"startAt":   utils.DateTime(player.StartAt),
+		})
+	}
 	pr := utils.NewPageResult(_players)
 	if form.Sort != "" {
 		pr.Sort(form.Sort, form.Order)
