@@ -1,4 +1,4 @@
-// +build rtsp_server
+// +build rtspserver
 package main
 
 import (
@@ -20,6 +20,7 @@ type serverTcpListener struct {
 
 func newServerTcpListener(p *program) (*serverTcpListener, error) {
 	nconn, err := net.ListenTCP("tcp", &net.TCPAddr{
+		IP:   []byte("10.0.0.30"),
 		Port: p.args.rtspPort,
 	})
 	if err != nil {

@@ -1,4 +1,4 @@
-// +build rtsp_server
+// +build rtspserver
 package main
 
 import (
@@ -22,6 +22,7 @@ type serverUdpListener struct {
 
 func newServerUdpListener(p *program, port int, flow trackFlow) (*serverUdpListener, error) {
 	nconn, err := net.ListenUDP("udp", &net.UDPAddr{
+		IP:   []byte("10.0.0.30"),
 		Port: port,
 	})
 	if err != nil {
