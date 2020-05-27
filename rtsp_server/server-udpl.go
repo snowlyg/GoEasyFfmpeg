@@ -1,4 +1,3 @@
-// +build rtspserver
 package main
 
 import (
@@ -21,8 +20,10 @@ type serverUdpListener struct {
 }
 
 func newServerUdpListener(p *program, port int, flow trackFlow) (*serverUdpListener, error) {
+	mask := net.IPv4Mask(byte(255), byte(255), byte(255), byte(255))
+	ip := net.ParseIP("10.0.0.30").Mask(mask)
 	nconn, err := net.ListenUDP("udp", &net.UDPAddr{
-		IP:   net.IPv4(0, 0, 0, 0),
+		IP:   ip,
 		Port: port,
 	})
 	if err != nil {
@@ -37,7 +38,7 @@ func newServerUdpListener(p *program, port int, flow trackFlow) (*serverUdpListe
 		done:  make(chan struct{}),
 	}
 
-	l.log("opened on :%d", port)
+	l.log("opened on %v:%d", ip.String(), port)
 	return l, nil
 }
 

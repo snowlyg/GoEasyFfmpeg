@@ -1,4 +1,3 @@
-// +build rtspserver
 package main
 
 import (
@@ -19,8 +18,10 @@ type serverTcpListener struct {
 }
 
 func newServerTcpListener(p *program) (*serverTcpListener, error) {
+	mask := net.IPv4Mask(byte(255), byte(255), byte(255), byte(255))
+	ip := net.ParseIP("10.0.0.30").Mask(mask)
 	nconn, err := net.ListenTCP("tcp", &net.TCPAddr{
-		IP:   net.IPv4(0, 0, 0, 0),
+		IP:   ip,
 		Port: p.args.rtspPort,
 	})
 	if err != nil {
@@ -35,7 +36,7 @@ func newServerTcpListener(p *program) (*serverTcpListener, error) {
 		done:       make(chan struct{}),
 	}
 
-	l.log("opened on :%d", p.args.rtspPort)
+	l.log("opened on %v:%d", ip.String(), p.args.rtspPort)
 	return l, nil
 }
 

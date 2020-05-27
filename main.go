@@ -45,12 +45,11 @@ func (p *program) StopHTTP() (err error) {
 
 func (p *program) StartHTTP() (err error) {
 	p.httpServer = &http.Server{
-		Addr:              fmt.Sprintf(":%d", p.httpPort),
+		Addr:              fmt.Sprintf("10.0.0.30:%d", p.httpPort),
 		Handler:           routers.Router,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
-	//link := fmt.Sprintf("http://%s:%d", "0.0.0.0", p.httpPort)
-	link := fmt.Sprintf("http://%s:%d", utils.LocalIP(), p.httpPort)
+	link := fmt.Sprintf("http://%s:%d", "10.0.0.30", p.httpPort)
 	log.Println("http server start -->", link)
 	go func() {
 		if err := p.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
