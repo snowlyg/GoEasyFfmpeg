@@ -108,7 +108,13 @@ func (p *program) Start(s service.Service) (err error) {
 					if stream.Status {
 						//	ffmpeg -i rtsp://localhost:8554/original -c:v libx264 -preset ultrafast -tune zerolatency -b 600k -f rtsp rtsp://localhost:8554/compressed
 
-						params := []string{"-i", stream.URL, "-strict", "-2", "-c:v", "libx264", "-preset", "ultrafast", "-tune", "zerolatency", "-b", "600k", "-f", "flv", stream.GetUrl()}
+						url := stream.GetUrl()
+						s2 := "rtsp"
+						if strings.Contains(url, "rtmp") {
+							s2 = "flv"
+						}
+
+						params := []string{"-i", stream.URL, "-strict", "-2", "-c:v", "libx264", "-preset", "ultrafast", "-tune", "zerolatency", "-b", "600k", "-f", s2, url}
 						findCmd := cmd.NewCmd(ffmpeg, params...)
 						statusChan := findCmd.Start() // non-blocking
 						finalStatus := <-statusChan
