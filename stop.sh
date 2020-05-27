@@ -2,5 +2,5 @@
 CWD=$(cd "$(dirname $0)";pwd)
 "$CWD"/easydarwin stop
 "$CWD"/easydarwin uninstall
-"$CWD"rtsp-server stop
-"$CWD"rtsp-server uninstall
+"$CWD"/rtspserver stop
+"$CWD"/rtspserver uninstall
