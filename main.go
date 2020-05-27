@@ -93,7 +93,6 @@ func (p *program) Start(s service.Service) (err error) {
 	}()
 
 	ffmpeg := utils.Conf().Section("rtsp").Key("ffmpeg_path").MustString("ffmpeg")
-	pathPort := utils.Conf().Section("rtsp").Key("port").MustString("8554")
 	stream_chan := stream_chan2.GetStreamChan()
 	go func() {
 		log.Println("log files -->", 2222)
@@ -108,14 +107,8 @@ func (p *program) Start(s service.Service) (err error) {
 				if addChnOk {
 					if stream.Status {
 						//	ffmpeg -i rtsp://localhost:8554/original -c:v libx264 -preset ultrafast -tune zerolatency -b 600k -f rtsp rtsp://localhost:8554/compressed
-						ip := stream.OutIp
-						if stream.OutIp == "" {
-							ip = utils.LocalIP()
-						}
 
-						path := fmt.Sprintf("rtsp://%v:%v%v", ip, pathPort, stream.CustomPath)
-						params := []string{"-i", stream.URL, "-strict", "-2", "-c:v", "libx264", "-preset", "ultrafast", "-tune", "zerolatency", "-b", "600k", "-f", "rtsp", path}
-
+						params := []string{"-i", stream.URL, "-strict", "-2", "-c:v", "libx264", "-preset", "ultrafast", "-tune", "zerolatency", "-b", "600k", "-f", "flv", stream.GetUrl()}
 						findCmd := cmd.NewCmd(ffmpeg, params...)
 						statusChan := findCmd.Start() // non-blocking
 						finalStatus := <-statusChan

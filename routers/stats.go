@@ -1,7 +1,6 @@
 package routers
 
 import (
-	"fmt"
 	"github.com/snowlyg/go-rtsp-server/extend/db"
 	"github.com/snowlyg/go-rtsp-server/models"
 	"log"
@@ -58,7 +57,7 @@ func (h *APIHandler) Pushers(c *gin.Context) {
 		log.Printf("find stream err:%v", err)
 		return
 	}
-	pathIp := utils.Conf().Section("rtsp").Key("port").MustString("8554")
+
 	pushers := make([]interface{}, 0)
 	for _, stream := range streams {
 		statusText := "已停止"
@@ -66,12 +65,7 @@ func (h *APIHandler) Pushers(c *gin.Context) {
 			statusText = "已启动"
 		}
 
-		ip := stream.OutIp
-		if stream.OutIp == "" {
-			ip = utils.LocalIP()
-		}
-
-		url := fmt.Sprintf("rtsp://%v:%v%v", ip, pathIp, stream.CustomPath)
+		url := stream.GetUrl()
 		pushers = append(pushers, map[string]interface{}{
 			"id":         stream.ID,
 			"source":     stream.URL,
