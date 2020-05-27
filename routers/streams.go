@@ -31,6 +31,7 @@ func (h *APIHandler) StreamAdd(c *gin.Context) {
 		Id         uint   `form:"id" `
 		URL        string `form:"source" binding:"required"`
 		CustomPath string `form:"customPath"`
+		OutIp      string `form:"outIp"`
 	}
 	var form Form
 	err := c.Bind(&form)
@@ -46,6 +47,7 @@ func (h *APIHandler) StreamAdd(c *gin.Context) {
 		stream := models.Stream{
 			URL:        form.URL,
 			CustomPath: form.CustomPath,
+			OutIp:      form.OutIp,
 			Status:     false,
 		}
 		db.SQLite.Create(&stream)
@@ -53,6 +55,7 @@ func (h *APIHandler) StreamAdd(c *gin.Context) {
 	} else {
 		oldStream.URL = form.URL
 		oldStream.CustomPath = form.CustomPath
+		oldStream.OutIp = form.OutIp
 		oldStream.Status = false
 		db.SQLite.Save(oldStream)
 		c.IndentedJSON(200, oldStream)
