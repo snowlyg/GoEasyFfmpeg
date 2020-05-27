@@ -114,7 +114,7 @@ func (p *program) Start(s service.Service) (err error) {
 							s2 = "flv"
 						}
 
-						params := []string{"-re", "-i", stream.URL, "-strict", "-2", "-vcodec", "libx264", "-max_delay", "100", "-acodec", "aac", "-f", "-g", "5", "-b", "700000", s2, url}
+						params := []string{"-re", "-i", stream.URL, "-strict", "-2", "-vcodec", "libx264", "-max_delay", "100", "-acodec", "aac", "-f", s2, "-g", "5", "-b:a", "700000k", url}
 						findCmd := cmd.NewCmd(ffmpeg, params...)
 						statusChan := findCmd.Start() // non-blocking
 						finalStatus := <-statusChan
