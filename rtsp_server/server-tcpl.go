@@ -18,10 +18,10 @@ type serverTcpListener struct {
 }
 
 func newServerTcpListener(p *program) (*serverTcpListener, error) {
-	mask := net.IPv4Mask(byte(255), byte(255), byte(255), byte(255))
-	ip := net.ParseIP("10.0.0.30").Mask(mask)
+	//mask := net.IPv4Mask(byte(255), byte(255), byte(255), byte(255))
+	//ip := net.ParseIP("10.0.0.30").Mask(mask)
 	nconn, err := net.ListenTCP("tcp", &net.TCPAddr{
-		IP:   ip,
+		//IP:   ip,
 		Port: p.args.rtspPort,
 	})
 	if err != nil {

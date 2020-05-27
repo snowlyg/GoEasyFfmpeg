@@ -20,10 +20,10 @@ type serverUdpListener struct {
 }
 
 func newServerUdpListener(p *program, port int, flow trackFlow) (*serverUdpListener, error) {
-	mask := net.IPv4Mask(byte(255), byte(255), byte(255), byte(255))
-	ip := net.ParseIP("10.0.0.30").Mask(mask)
+	//mask := net.IPv4Mask(byte(255), byte(255), byte(255), byte(255))
+	//ip := net.ParseIP("10.0.0.30").Mask(mask)
 	nconn, err := net.ListenUDP("udp", &net.UDPAddr{
-		IP:   ip,
+		//IP:   ip,
 		Port: port,
 	})
 	if err != nil {
