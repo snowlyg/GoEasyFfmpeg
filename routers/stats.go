@@ -65,7 +65,13 @@ func (h *APIHandler) Pushers(c *gin.Context) {
 		if stream.Status {
 			statusText = "已启动"
 		}
-		url := fmt.Sprintf("rtsp://%v:%v%v", utils.LocalIP(), pathIp, stream.CustomPath)
+
+		ip := stream.OutIp
+		if stream.OutIp == "" {
+			ip = utils.LocalIP()
+		}
+
+		url := fmt.Sprintf("rtsp://%v:%v%v", ip, pathIp, stream.CustomPath)
 		pushers = append(pushers, map[string]interface{}{
 			"id":         stream.ID,
 			"source":     stream.URL,
