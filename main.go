@@ -114,7 +114,7 @@ func (p *program) Start(s service.Service) (err error) {
 						}
 
 						path := fmt.Sprintf("rtsp://%v:%v%v", ip, pathPort, stream.CustomPath)
-						params := []string{"-i", stream.URL, "-c:v", "libx264", "-preset", "ultrafast", "-tune", "zerolatency", "-b", "600k", "-f", "rtsp", path}
+						params := []string{"-i", stream.URL, "-strict", "-2", "-c:v", "libx264", "-preset", "ultrafast", "-tune", "zerolatency", "-b", "600k", "-f", "rtsp", path}
 
 						findCmd := cmd.NewCmd(ffmpeg, params...)
 						statusChan := findCmd.Start() // non-blocking
