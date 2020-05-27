@@ -70,6 +70,7 @@ func (h *APIHandler) Pushers(c *gin.Context) {
 			"id":         stream.ID,
 			"source":     stream.URL,
 			"customPath": stream.CustomPath,
+			"outIp":      stream.OutIp,
 			"url":        url,
 			"status":     statusText,
 		})

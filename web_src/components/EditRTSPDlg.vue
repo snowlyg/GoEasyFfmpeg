@@ -16,7 +16,7 @@
             </div>
         </div>
         <div :class="['form-group', { 'has-error': errors.has('outIp')}]">
-            <label for="input-custom-path" class="col-sm-3 control-label">自定义路径</label>
+            <label for="input-custom-path" class="col-sm-3 control-label">输出ip地址</label>
             <div class="col-sm-8">
                 <input type="text" id="input-out-ip" class="form-control" name="outIp" data-vv-as="输出ip地址" v-model.trim="form.outIp" placeholder="/your/out/ip">
                 <span class="help-block">{{errors.first('outIp')}}</span>
