@@ -20,7 +20,7 @@ type serverTcpListener struct {
 
 func newServerTcpListener(p *program) (*serverTcpListener, error) {
 	nconn, err := net.ListenTCP("tcp", &net.TCPAddr{
-		IP:   []byte("10.0.0.30"),
+		IP:   net.IPv4(0, 0, 0, 0),
 		Port: p.args.rtspPort,
 	})
 	if err != nil {

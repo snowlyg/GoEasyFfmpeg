@@ -22,7 +22,7 @@ type serverUdpListener struct {
 
 func newServerUdpListener(p *program, port int, flow trackFlow) (*serverUdpListener, error) {
 	nconn, err := net.ListenUDP("udp", &net.UDPAddr{
-		IP:   []byte("10.0.0.30"),
+		IP:   net.IPv4(0, 0, 0, 0),
 		Port: port,
 	})
 	if err != nil {
