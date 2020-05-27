@@ -45,7 +45,7 @@ func (p *program) StopHTTP() (err error) {
 
 func (p *program) StartHTTP() (err error) {
 	p.httpServer = &http.Server{
-		Addr:              fmt.Sprintf("%d", p.httpPort),
+		Addr:              fmt.Sprintf(":%d", p.httpPort),
 		Handler:           routers.Router,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
