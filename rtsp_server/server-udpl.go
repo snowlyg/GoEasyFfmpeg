@@ -1,3 +1,4 @@
+// +build rtsp_server
 package main
 
 import (
