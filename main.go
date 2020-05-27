@@ -110,11 +110,11 @@ func (p *program) Start(s service.Service) (err error) {
 
 						url := stream.GetUrl()
 						s2 := "rtsp"
-						if strings.Contains(url, "rtmp") {
+						if strings.Contains(url, "rtmp://") {
 							s2 = "flv"
 						}
 
-						params := []string{"-i", stream.URL, "-strict", "-2", "-c:v", "libx264", "-preset", "ultrafast", "-tune", "zerolatency", "-b", "600k", "-f", s2, url}
+						params := []string{"-re", "-i", stream.URL, "-strict", "-2", "-vcodec", "libx264", "-acodec", "aac", "-f", s2, url}
 						findCmd := cmd.NewCmd(ffmpeg, params...)
 						statusChan := findCmd.Start() // non-blocking
 						finalStatus := <-statusChan
