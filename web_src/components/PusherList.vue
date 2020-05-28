@@ -17,7 +17,8 @@
                 <h4 class="text-success text-center">推流列表</h4>
                 <form class="form-inline">
                     <div class="form-group">
-                        <button type="button" class="btn btn-sm btn-success" @click.prevent="$refs['pullRTSPDlg'].show()"><i class="fa fa-plus"></i> 拉流分发
+                        <button type="button" class="btn btn-sm btn-success"
+                                @click.prevent="$refs['pullRTSPDlg'].show()"><i class="fa fa-plus"></i> 拉流分发
                         </button>
                     </div>
                     <div class="form-group pull-right">
@@ -57,13 +58,13 @@
                         </template>
                     </el-table-column>
                     <el-table-column prop="transType" label="传输方式" min-width="100"></el-table-column>
-                    <el-table-column prop="inBytes" label="上行流量" min-width="60" :formatter="formatBytes"
-                                     sortable="custom"></el-table-column>
-                    <el-table-column prop="outBytes" label="下行流量" min-width="60" :formatter="formatBytes"
-                                     sortable="custom"></el-table-column>
-                    <el-table-column prop="onlines" label="在线人数" min-width="100" sortable="custom"></el-table-column>
                     <el-table-column prop="startAt" label="开始时间" min-width="200" sortable="custom"></el-table-column>
-                    <el-table-column prop="status" label="状态" min-width="70" sortable="custom"></el-table-column>
+                    <el-table-column prop="status" label="状态" min-width="70" sortable="custom">
+                        <template slot-scope="scope">
+                            <span v-if="scope.row.status=== '已启动'" class="bg-green" style="padding: 3px">{{scope.row.status}}</span>
+                            <span v-else class="bg-red" style="padding: 3px">{{scope.row.status}}</span>
+                        </template>
+                    </el-table-column>
                     <el-table-column label="操作" min-width="200" fixed="right">
                         <template slot-scope="scope">
                             <div class="btn-group">
@@ -81,7 +82,7 @@
                                       <i class="fa fa-play"></i> 启动
                                     </a>
                                     <a v-if="scope.row.status === '已停止'" role="button" class="btn btn-xs btn-danger"
-                                         @click.prevent="del(scope.row)"><i class="fa fa-trash"></i> 删除
+                                       @click.prevent="del(scope.row)"><i class="fa fa-trash"></i> 删除
                                     </a>
                                 </span>
                             </div>
@@ -95,7 +96,7 @@
             </div>
         </div>
         <PullRTSPDlg ref="pullRTSPDlg" @submit="getPushers"></PullRTSPDlg>
-        <EditRTSPDlg ref="editRTSPDlg" @submit="getPushers" :streamInfo="streamInfo" ></EditRTSPDlg>
+        <EditRTSPDlg ref="editRTSPDlg" @submit="getPushers" :streamInfo="streamInfo"></EditRTSPDlg>
     </div>
 </template>
 
@@ -122,7 +123,7 @@
                 timer: 0,
                 pageSize: 10,
                 currentPage: 1,
-                streamInfo:{},
+                streamInfo: {},
             };
         },
         beforeDestroy() {

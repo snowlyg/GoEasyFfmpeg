@@ -58,7 +58,7 @@ func (p *program) StartHTTP() (err error) {
 		if err := p.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Println("start http server error", err)
 		}
-		log.Println("http server end")
+		log.Println("http server start")
 	}()
 	return
 }
@@ -73,7 +73,7 @@ func (p *program) StartRTSP() (err error) {
 		if err := p.rtspServer.Start(); err != nil {
 			log.Println("start rtsp server error", err)
 		}
-		log.Println("rtsp server end")
+		log.Println("rtsp server start")
 	}()
 	return
 }
@@ -130,7 +130,6 @@ func (p *program) Start(s service.Service) (err error) {
 	go func() {
 		log.Printf("demon pull streams")
 		for {
-
 			var streams []models.Stream
 			if err := db.SQLite.Find(&streams).Error; err != nil {
 				log.Printf("find stream err:%v", err)
@@ -140,7 +139,7 @@ func (p *program) Start(s service.Service) (err error) {
 			for i := len(streams) - 1; i > -1; i-- {
 				v := streams[i]
 				pusher := rtsp.NewClientPusher(v.ID, v.URL, v.CustomPath)
-				if rtsp.GetServer().GetPusher(pusher.Path) != nil {
+				if rtsp.GetServer().GetPusher(v.CustomPath) != nil {
 					continue
 				}
 				if v.Status {
@@ -150,9 +149,10 @@ func (p *program) Start(s service.Service) (err error) {
 				//streams = streams[0:i]
 				//streams = append(streams[:i], streams[i+1:]...)
 			}
-			time.Sleep(2 * time.Second)
+			time.Sleep(1 * time.Second)
 		}
 	}()
+	log.Printf("server start ")
 	return
 }
 

@@ -63,13 +63,9 @@ func (h *APIHandler) Pushers(c *gin.Context) {
 
 	pushers := make([]interface{}, 0)
 	for _, stream := range streams {
-		var inBytes int
-		var outBytes int
 		var startAt string
 		var url string
-		var onlines int
 		statusText := "已停止"
-
 		rIPushers := rtsp.Instance.GetPushers()
 		for _, v := range rIPushers {
 			if stream.ID == v.ID {
@@ -79,6 +75,8 @@ func (h *APIHandler) Pushers(c *gin.Context) {
 					}
 				}
 			}
+			startAt = stream.UpdatedAt.String()
+
 		}
 
 		url = fmt.Sprintf("rtmp://%s:1935/live/%v", "localhost", stream.RoomName)
@@ -95,10 +93,7 @@ func (h *APIHandler) Pushers(c *gin.Context) {
 			"url":       url,        //  播放地址
 			"source":    stream.URL, // 源地址
 			"transType": stream.TransType,
-			"inBytes":   inBytes,
-			"outBytes":  outBytes,
 			"startAt":   startAt,
-			"onlines":   onlines,
 			"roomName":  stream.RoomName,
 			"status":    statusText,
 		})
