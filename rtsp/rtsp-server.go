@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -59,7 +60,11 @@ func (server *Server) Start() (err error) {
 						continue
 					}
 
-					params := []string{"-i", pusher.Source, "-strict", "-2", "-threads", "4", "-c:v", "libx264", "-c:a", "aac", "-f", "flv", pusher.Path}
+					paramStr := utils.Conf().Section("rtsp").Key("decoder").MustString("-strict -2 -threads 2 -c:v copy -c:a copy -f flv")
+					params := []string{"-i", pusher.Source, pusher.Path}
+					paramsOfThisPath := strings.Split(paramStr, " ")
+					params = append(params[:1], append(paramsOfThisPath, params[1:]...)...)
+
 					cmd := exec.Command(ffmpeg, params...)
 					f, err := os.OpenFile(path.Join(dir, fmt.Sprintf("log.txt")), os.O_RDWR|os.O_CREATE, 0755)
 					if err == nil {
