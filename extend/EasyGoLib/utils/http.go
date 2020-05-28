@@ -24,26 +24,29 @@ func GetRequestHostname(r *http.Request) (hostname string) {
 	return
 }
 
-type GetRe struct {
+type getRe struct {
 	Status string
 	Data   string
 }
 
-func GetHttp(roomName string) (GetRe, error) {
-	var re GetRe
+func GetHttpCustomPath(roomName string) (string, error) {
+	var re getRe
 
 	roomKeyPath := fmt.Sprintf("http://localhost:8090/control/get?room=%v", roomName)
 	response, err := http.Get(roomKeyPath)
 	if err != nil {
-		return re, err
+		return "", err
 	}
 	defer response.Body.Close()
 	body, err2 := ioutil.ReadAll(response.Body)
 	if err2 != nil {
-		return re, err
+		return "", err
 	}
 
 	json.Unmarshal(body, &re)
 
-	return re, nil
+	outputIp := Conf().Section("rtsp").Key("output_ip").MustString("localhost")
+	customPath := fmt.Sprintf("rtmp://%s:1935/%s/%s", outputIp, "live", re.Data)
+
+	return customPath, nil
 }

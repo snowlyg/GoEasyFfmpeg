@@ -10,6 +10,5 @@ type Stream struct {
 	CustomPath string `gorm:"type:varchar(256)"`
 	TransType  string `gorm:"type:varchar(256)"`
 	RoomName   string `gorm:"type:varchar(256)"`
-	RoomKey    string `gorm:"type:varchar(256)"`
 	Status     bool
 }

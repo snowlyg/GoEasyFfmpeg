@@ -43,11 +43,10 @@ func (h *APIHandler) StreamAdd(c *gin.Context) {
 	}
 
 	// 获取 room key
-	re, err := utils.GetHttp(form.RoomName)
+	customPath, err := utils.GetHttpCustomPath(form.RoomName)
 	if err != nil {
 		log.Printf("Pull to push err:%v", err)
 	}
-	customPath := fmt.Sprintf("rtmp://localhost:1935/%s/%s", "live", re.Data)
 
 	// save to db.
 	oldStream := models.Stream{}
@@ -57,7 +56,6 @@ func (h *APIHandler) StreamAdd(c *gin.Context) {
 			CustomPath: customPath, // 请求地址
 			TransType:  form.TransType,
 			RoomName:   form.RoomName,
-			RoomKey:    re.Data,
 			Status:     false,
 		}
 		db.SQLite.Create(&stream)
@@ -67,7 +65,6 @@ func (h *APIHandler) StreamAdd(c *gin.Context) {
 		oldStream.CustomPath = customPath
 		oldStream.TransType = form.TransType
 		oldStream.RoomName = form.RoomName
-		oldStream.RoomKey = re.Data
 		oldStream.Status = false
 		db.SQLite.Save(oldStream)
 		c.IndentedJSON(200, oldStream)
@@ -144,14 +141,12 @@ func (h *APIHandler) StreamStart(c *gin.Context) {
 	}
 
 	// 获取 room key
-	re, err := utils.GetHttp(stream.RoomName)
+	customPath, err := utils.GetHttpCustomPath(stream.RoomName)
 	if err != nil {
 		log.Printf("Pull to push err:%v", err)
 	}
-	customPath := fmt.Sprintf("rtmp://localhost:1935/%s/%s", "live", re.Data)
 
 	stream.Status = true
-	stream.RoomKey = re.Data
 	stream.CustomPath = customPath
 	db.SQLite.Save(stream)
 	if stream.Status {

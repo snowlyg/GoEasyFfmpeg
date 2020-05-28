@@ -1,7 +1,7 @@
 .vscode
-/easydarwin
-/EasyDarwin.exe
-/EasyDarwin.exe~
+/goeasyffmpeg
+/*.exe
+/*.exe~
 /logs
 /*.log
 node_modules
@@ -20,4 +20,3 @@ debug
 debug.ini
 easydarwin.ini
 www/
-EasyDarwinGoM3u8/
