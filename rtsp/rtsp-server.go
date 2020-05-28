@@ -59,7 +59,7 @@ func (server *Server) Start() (err error) {
 						continue
 					}
 
-					params := []string{"-i", pusher.Source, "-strict", "-2", "-vcodec", "h264", "-acodec", "aac", "-f", "flv", pusher.Path}
+					params := []string{"-i", pusher.Source, "-strict", "-2", "-threads", "-2", "-vcodec", "h264", "-acodec", "aac", "-f", "flv", pusher.Path}
 					cmd := exec.Command(ffmpeg, params...)
 					f, err := os.OpenFile(path.Join(dir, fmt.Sprintf("log.txt")), os.O_RDWR|os.O_CREATE, 0755)
 					if err == nil {
