@@ -55,13 +55,10 @@ func (h *APIHandler) StreamAdd(c *gin.Context) {
 	if db.SQLite.Where("id = ? ", form.Id).First(&oldStream).RecordNotFound() {
 
 		stream := models.Stream{
-			URL:               form.URL,
-			CustomPath:        form.CustomPath,
-			IdleTimeout:       form.IdleTimeout,
-			TransType:         transType,
-			TransRtpType:      form.TransRtpType,
-			HeartbeatInterval: form.HeartbeatInterval,
-			Status:            false,
+			URL:        form.URL,
+			CustomPath: form.CustomPath,
+			TransType:  transType,
+			Status:     false,
 		}
 		db.SQLite.Create(&stream)
 		c.IndentedJSON(200, stream)
@@ -69,9 +66,6 @@ func (h *APIHandler) StreamAdd(c *gin.Context) {
 		oldStream.URL = form.URL
 		oldStream.CustomPath = form.CustomPath
 		oldStream.TransType = transType
-		oldStream.TransRtpType = form.TransRtpType
-		oldStream.IdleTimeout = form.IdleTimeout
-		oldStream.HeartbeatInterval = form.HeartbeatInterval
 		oldStream.Status = false
 		db.SQLite.Save(oldStream)
 		c.IndentedJSON(200, oldStream)
@@ -100,20 +94,18 @@ func (h *APIHandler) StreamStop(c *gin.Context) {
 	}
 
 	stream := getStream(form.ID)
-	pushers := rtsp.GetServer().GetPushers()
-	for _, v := range pushers {
-		v.Stop()
-		rtsp.GetServer().RemovePusher(v)
+	stream.Status = false
+	db.SQLite.Save(stream)
+	if !stream.Status {
+		pusher := rtsp.GetServer().GetPusher(stream.URL)
+		pusher.Stoped = true
+		rtsp.GetServer().RemovePusher(pusher)
 		c.IndentedJSON(200, "OK")
-		log.Printf("Stop %v success ", v)
-
-		stream.Status = false
-		stream.StreamId = ""
-		db.SQLite.Save(stream)
+		log.Printf("Stop %v success ", stream.URL)
 		return
 	}
 
-	c.AbortWithStatusJSON(http.StatusBadRequest, fmt.Sprintf("Pusher[%s] not found", stream.StreamId))
+	c.AbortWithStatusJSON(http.StatusBadRequest, fmt.Sprintf("Pusher[%s] not found", stream.URL))
 }
 
 func getStream(formId string) models.Stream {
@@ -154,16 +146,16 @@ func (h *APIHandler) StreamStart(c *gin.Context) {
 		rtsp.GetServer().RemovePusher(p)
 	}
 
-	pusher := rtsp.NewClientPusher()
-
-	log.Printf("Pull to push %v success ", stream.StreamId)
-	rtsp.GetServer().AddPusher(pusher)
-
-	stream.StreamId = pusher.ID
+	pusher := rtsp.NewClientPusher(stream.ID, stream.URL, stream.CustomPath)
 	stream.Status = true
 	db.SQLite.Save(stream)
-	c.IndentedJSON(200, "OK")
-	return
+
+	if stream.Status {
+		pusher.Stoped = false
+		rtsp.GetServer().AddPusher(pusher)
+		c.IndentedJSON(200, "OK")
+		return
+	}
 
 	c.AbortWithStatusJSON(http.StatusBadRequest, fmt.Sprintf("Pusher[%s] not found or not start", form.ID))
 }

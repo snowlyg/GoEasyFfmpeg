@@ -5,9 +5,10 @@ import (
 )
 
 type Pusher struct {
-	ID                string
+	ID                uint
 	Path              string
-	players           map[string]*Player //SessionID <-> Player
+	Source            string
+	players           map[uint]*Player //SessionID <-> Player
 	playersLock       sync.RWMutex
 	gopCacheEnable    bool
 	gopCacheLock      sync.RWMutex
@@ -17,10 +18,14 @@ type Pusher struct {
 }
 
 // NewClientPusher 新建推流器客户端
-func NewClientPusher() (pusher *Pusher) {
+func NewClientPusher(id uint, path, source string) (pusher *Pusher) {
 	pusher = &Pusher{
-		players: make(map[string]*Player),
+		ID:      id,
+		Path:    path,
+		Source:  source,
+		players: make(map[uint]*Player),
 		cond:    sync.NewCond(&sync.Mutex{}),
+		Stoped:  true,
 	}
 
 	return
@@ -29,7 +34,7 @@ func NewClientPusher() (pusher *Pusher) {
 // NewPusher 新建推流器
 func NewPusher() (pusher *Pusher) {
 	pusher = &Pusher{
-		players: make(map[string]*Player),
+		players: make(map[uint]*Player),
 		cond:    sync.NewCond(&sync.Mutex{}),
 	}
 
@@ -49,8 +54,8 @@ func (pusher *Pusher) Stop() {
 }
 
 // GetPlayers 获取播放者
-func (pusher *Pusher) GetPlayers() (players map[string]*Player) {
-	players = make(map[string]*Player)
+func (pusher *Pusher) GetPlayers() (players map[uint]*Player) {
+	players = make(map[uint]*Player)
 	pusher.playersLock.RLock()
 	for k, v := range pusher.players {
 		players[k] = v
@@ -101,13 +106,13 @@ func (pusher *Pusher) RemovePlayer(player *Player) *Pusher {
 
 // ClearPlayer 清除播放者
 func (pusher *Pusher) ClearPlayer() {
-	players := make(map[string]*Player)
+	players := make(map[uint]*Player)
 	pusher.playersLock.Lock()
 	for k, v := range pusher.players {
 		v.Stoped = true
 		players[k] = v
 	}
-	pusher.players = make(map[string]*Player)
+	pusher.players = make(map[uint]*Player)
 	pusher.playersLock.Unlock()
 	go func() { // do not block
 		for _, v := range players {

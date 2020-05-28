@@ -62,60 +62,39 @@ func (h *APIHandler) Pushers(c *gin.Context) {
 
 	pushers := make([]interface{}, 0)
 	for _, stream := range streams {
-		var url string
-		var path string
 		var inBytes int
 		var outBytes int
 		var startAt string
+		var url string
+		var path string
 		var onlines int
 		statusText := "已停止"
-		streamID := ""
 
 		rIPushers := rtsp.Instance.GetPushers()
-		for _, _ = range rIPushers {
-
-			//if form.Q != "" && !strings.Contains(strings.ToLower(rtspURl), strings.ToLower(form.Q)) {
-			//	continue
-			//}
-
-			//if stream.URL == pusher.RTSPClient.URL {
-			//	if stream.Status {
-			//		if !pusher.Stoped() {
-			//			statusText = "已启动"
-			//		}
-			//	}
-			//	streamID = stream.StreamId
-			//	startAtTime := utils.DateTime(pusher.StartAt())
-			//	startAt = startAtTime.String()
-			//	url, path, inBytes, outBytes, onlines = rtspURl, pusher.Path(), pusher.InBytes(), pusher.OutBytes(), len(pusher.GetPlayers())
-			//}
-		}
-
-		transType := "TCP"
-		if stream.TransType == 0 {
-			transType = "TCP"
-		} else if stream.TransType == 1 {
-			transType = "UDP"
+		for _, v := range rIPushers {
+			if stream.ID == v.ID {
+				if stream.Status {
+					if !v.Stoped {
+						statusText = "已启动"
+					}
+				}
+				url = v.Source
+				path = v.Path
+			}
 		}
 
 		pushers = append(pushers, map[string]interface{}{
-			"id":                stream.ID,
-			"streamId":          streamID,
-			"url":               url,
-			"path":              path,
-			"source":            stream.URL,
-			"transType":         transType,
-			"transRtpType":      stream.TransRtpType,
-			"inBytes":           inBytes,
-			"outBytes":          outBytes,
-			"startAt":           startAt,
-			"onlines":           onlines,
-			"idleTimeout":       stream.IdleTimeout,
-			"heartbeatInterval": stream.HeartbeatInterval,
-			"customPath":        stream.CustomPath,
-			"status":            statusText,
+			"id":        stream.ID,
+			"url":       url,
+			"path":      path,
+			"source":    stream.URL,
+			"transType": stream.TransType,
+			"inBytes":   inBytes,
+			"outBytes":  outBytes,
+			"startAt":   startAt,
+			"onlines":   onlines,
+			"status":    statusText,
 		})
-
 	}
 
 	pr := utils.NewPageResult(pushers)

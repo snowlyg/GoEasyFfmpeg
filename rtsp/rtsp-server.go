@@ -5,10 +5,8 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"path"
 	"sync"
 	"syscall"
-	"time"
 )
 
 type Server struct {
@@ -23,9 +21,8 @@ type Server struct {
 }
 
 var Instance *Server = &Server{
-	SessionLogger: SessionLogger{log.New(os.Stdout, "[RTSPServer]", log.LstdFlags|log.Lshortfile)},
-	Stoped:        true,
-	//TCPPort:        utils.Conf().Section("rtsp").Key("port").MustInt(554),
+	SessionLogger:  SessionLogger{log.New(os.Stdout, "[RTSPServer]", log.LstdFlags|log.Lshortfile)},
+	Stoped:         true,
 	pushers:        make(map[string]*Pusher),
 	addPusherCh:    make(chan *Pusher),
 	removePusherCh: make(chan *Pusher),
@@ -42,7 +39,6 @@ func (server *Server) Start() (err error) {
 	localRecord := utils.Conf().Section("rtsp").Key("save_stream_to_local").MustInt(0)
 	ffmpeg := utils.Conf().Section("rtsp").Key("ffmpeg_path").MustString("")
 	m3u8DirPath := utils.Conf().Section("rtsp").Key("m3u8_dir_path").MustString("")
-	//tsDurationSecond := utils.Conf().Section("rtsp").Key("ts_duration_second").MustInt(6)
 
 	SaveStreamToLocal := false
 	if (len(ffmpeg) > 0) && localRecord > 0 && len(m3u8DirPath) > 0 {
@@ -68,14 +64,8 @@ func (server *Server) Start() (err error) {
 			case pusher, addChnOk = <-server.addPusherCh:
 				if SaveStreamToLocal {
 					if addChnOk {
-						dir := path.Join(m3u8DirPath, pusher.Path, time.Now().Format("20060102"))
-						err := utils.EnsureDir(dir)
-						if err != nil {
-							logger.Printf("EnsureDir:[%s] err:%v.", dir, err)
-							continue
-						}
 
-						params := []string{"-i", "rtsp://183.59.168.27:554/PLTV/88888905/224/3221227255/10000100000000060000000001066420_0.smil?icip=88888888", "-strict", "-2", "-vcodec", "h264", "-acodec", "aac", "-f", "flv", "rtmp://localhost:1935/live/rfBd56ti2SMtYvSgD5xAV0YU99zampta7Z7S575KLkIZ9PYk"}
+						params := []string{"-i", pusher.Source, "-strict", "-2", "-vcodec", "h264", "-acodec", "aac", "-f", "flv", pusher.Path}
 						cmd := exec.Command(ffmpeg, params...)
 						err = cmd.Start()
 						if err != nil {

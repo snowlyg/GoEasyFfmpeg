@@ -143,12 +143,11 @@ func (p *program) Start(s service.Service) (err error) {
 					agent = fmt.Sprintf("%s(%s)", agent, routers.BuildDateTime)
 				}
 
-				pusher := rtsp.NewClientPusher()
+				pusher := rtsp.NewClientPusher(v.ID, v.URL, v.CustomPath)
 				if rtsp.GetServer().GetPusher(pusher.Path) != nil {
 					continue
 				}
 				if v.Status {
-
 					rtsp.GetServer().AddPusher(pusher)
 				}
 				//streams = streams[0:i]
