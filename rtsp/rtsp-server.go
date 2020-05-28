@@ -1,17 +1,14 @@
 package rtsp
 
 import (
-	"fmt"
+	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/utils"
 	"log"
 	"os"
 	"os/exec"
 	"path"
-	"strconv"
 	"sync"
 	"syscall"
 	"time"
-
-	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/utils"
 )
 
 type Server struct {
@@ -41,19 +38,11 @@ func GetServer() *Server {
 // Start 启动
 func (server *Server) Start() (err error) {
 	logger := server.logger
-	//addr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf(":%d", server.TCPPort))
-	//if err != nil {
-	//	return
-	//}
-	//listener, err := net.ListenTCP("tcp", addr)
-	//if err != nil {
-	//	return
-	//}
 
 	localRecord := utils.Conf().Section("rtsp").Key("save_stream_to_local").MustInt(0)
 	ffmpeg := utils.Conf().Section("rtsp").Key("ffmpeg_path").MustString("")
 	m3u8DirPath := utils.Conf().Section("rtsp").Key("m3u8_dir_path").MustString("")
-	tsDurationSecond := utils.Conf().Section("rtsp").Key("ts_duration_second").MustInt(6)
+	//tsDurationSecond := utils.Conf().Section("rtsp").Key("ts_duration_second").MustInt(6)
 
 	SaveStreamToLocal := false
 	if (len(ffmpeg) > 0) && localRecord > 0 && len(m3u8DirPath) > 0 {
@@ -79,35 +68,24 @@ func (server *Server) Start() (err error) {
 			case pusher, addChnOk = <-server.addPusherCh:
 				if SaveStreamToLocal {
 					if addChnOk {
-						dir := path.Join(m3u8DirPath, pusher.Path(), time.Now().Format("20060102"))
+						dir := path.Join(m3u8DirPath, pusher.Path, time.Now().Format("20060102"))
 						err := utils.EnsureDir(dir)
 						if err != nil {
 							logger.Printf("EnsureDir:[%s] err:%v.", dir, err)
 							continue
 						}
-						m3u8path := path.Join(dir, fmt.Sprintf("out.m3u8"))
-						//port := pusher.Server().TCPPort
-						//rtsp := fmt.Sprintf("rtsp://%v:%d%s", utils.LocalIP(), port, pusher.Path())
-						//paramStr := utils.Conf().Section("rtsp").Key(pusher.Path()).MustString("-c:v copy -c:a aac")
 
-						params := []string{"-fflags", "genpts", "-rtsp_transport", "tcp", "-i", "http", "-hls_time", strconv.Itoa(tsDurationSecond), "-hls_list_size", "0", m3u8path}
-						//if paramStr != "default" {
-						//	paramsOfThisPath := strings.Split(paramStr, " ")
-						//	params = append(params[:6], append(paramsOfThisPath, params[6:]...)...)
-						//}
-						// rtsp 转 hls
-
-						// ffmpeg -i ~/Downloads/720p.mp4 -s 640x360 -g 15 -c:a aac -hls_time 5 -hls_list_size 0 record.m3u8
+						params := []string{"-i", "rtsp://183.59.168.27:554/PLTV/88888905/224/3221227255/10000100000000060000000001066420_0.smil?icip=88888888", "-strict", "-2", "-vcodec", "h264", "-acodec", "aac", "-f", "flv", "rtmp://localhost:1935/live/rfBd56ti2SMtYvSgD5xAV0YU99zampta7Z7S575KLkIZ9PYk"}
 						cmd := exec.Command(ffmpeg, params...)
-						f, err := os.OpenFile(path.Join(dir, fmt.Sprintf("log.txt")), os.O_RDWR|os.O_CREATE, 0755)
-						if err == nil {
-							cmd.Stdout = f
-							cmd.Stderr = f
-						}
 						err = cmd.Start()
 						if err != nil {
 							logger.Printf("Start ffmpeg err:%v", err)
 						}
+
+						if err := cmd.Wait(); err != nil {
+							log.Printf("Cmd returned error: %v", err)
+						}
+
 						pusher2FfmpegMap[pusher] = cmd
 						logger.Printf("add ffmpeg [%v] to pull stream from pusher[%v]", cmd, pusher)
 					} else {
@@ -123,13 +101,7 @@ func (server *Server) Start() (err error) {
 							logger.Printf("prepare to SIGTERM to process:%v", proc)
 							proc.Signal(syscall.SIGTERM)
 							proc.Wait()
-							// proc.Kill()
-							// no need to close attached log file.
-							// see "Wait releases any resources associated with the Cmd."
-							// if closer, ok := cmd.Stdout.(io.Closer); ok {
-							// 	closer.Close()
-							// 	logger.Printf("process:%v Stdout closed.", proc)
-							// }
+
 							logger.Printf("process:%v terminate.", proc)
 						}
 						delete(pusher2FfmpegMap, pusher)
@@ -151,39 +123,13 @@ func (server *Server) Start() (err error) {
 	}()
 
 	server.Stoped = false
-	//server.TCPListener = listener
-	//logger.Println("rtsp server start on", server.TCPPort)
-	//networkBuffer := utils.Conf().Section("rtsp").Key("network_buffer").MustInt(1048576)
-	//for !server.Stoped {
-	//	conn, err := server.TCPListener.Accept()
-	//	if err != nil {
-	//		logger.Println(err)
-	//		continue
-	//	}
-	//	if tcpConn, ok := conn.(*net.TCPConn); ok {
-	//		if err := tcpConn.SetReadBuffer(networkBuffer); err != nil {
-	//			logger.Printf("rtsp server conn set read buffer error, %v", err)
-	//		}
-	//		if err := tcpConn.SetWriteBuffer(networkBuffer); err != nil {
-	//			logger.Printf("rtsp server conn set write buffer error, %v", err)
-	//		}
-	//	}
-	//
-	//	session := NewSession(server, conn)
-	//	go session.Start()
-	//}
+
 	return
 }
 
 // Stop 停止
 func (server *Server) Stop() {
-	//logger := server.logger
-	//logger.Println("rtsp server stop on", server.TCPPort)
 	server.Stoped = true
-	//if server.TCPListener != nil {
-	//	_ = server.TCPListener.Close()
-	//	server.TCPListener = nil
-	//}
 	server.pushersLock.Lock()
 	server.pushers = make(map[string]*Pusher)
 	server.pushersLock.Unlock()
@@ -197,9 +143,9 @@ func (server *Server) AddPusher(pusher *Pusher) bool {
 	logger := server.logger
 	added := false
 	server.pushersLock.Lock()
-	_, ok := server.pushers[pusher.Path()]
+	_, ok := server.pushers[pusher.Path]
 	if !ok {
-		server.pushers[pusher.Path()] = pusher
+		server.pushers[pusher.Path] = pusher
 		logger.Printf("%v start, now pusher size[%d]", pusher, len(server.pushers))
 		added = true
 	} else {
@@ -219,8 +165,8 @@ func (server *Server) RemovePusher(pusher *Pusher) {
 	logger := server.logger
 	removed := false
 	server.pushersLock.Lock()
-	if _pusher, ok := server.pushers[pusher.Path()]; ok && pusher.ID() == _pusher.ID() {
-		delete(server.pushers, pusher.Path())
+	if _pusher, ok := server.pushers[pusher.Path]; ok && pusher.ID == _pusher.ID {
+		delete(server.pushers, pusher.Path)
 		logger.Printf("%v end, now pusher size[%d]\n", pusher, len(server.pushers))
 		removed = true
 	}

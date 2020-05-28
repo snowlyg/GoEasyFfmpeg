@@ -1,11 +1,9 @@
 package routers
 
 import (
-	"fmt"
 	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/db"
 	"github.com/snowlyg/go-rtsp-server/models"
 	"log"
-	"strings"
 	//"strings"
 
 	"github.com/gin-gonic/gin"
@@ -54,7 +52,7 @@ func (h *APIHandler) Pushers(c *gin.Context) {
 		return
 	}
 
-	hostname := utils.GetRequestHostname(c.Request)
+	//hostname := utils.GetRequestHostname(c.Request)
 
 	var streams []models.Stream
 	if err := db.SQLite.Find(&streams).Error; err != nil {
@@ -74,17 +72,11 @@ func (h *APIHandler) Pushers(c *gin.Context) {
 		streamID := ""
 
 		rIPushers := rtsp.Instance.GetPushers()
-		for _, pusher := range rIPushers {
-			//port := pusher.Server().TCPPort
+		for _, _ = range rIPushers {
 
-			//rtspURl := fmt.Sprintf("rtsp://%s:%d%s", hostname, port, pusher.Path())
-			//if port == 554 {
-			//	rtspURl = fmt.Sprintf("rtsp://%s%s", hostname, pusher.Path())
+			//if form.Q != "" && !strings.Contains(strings.ToLower(rtspURl), strings.ToLower(form.Q)) {
+			//	continue
 			//}
-
-			if form.Q != "" && !strings.Contains(strings.ToLower(rtspURl), strings.ToLower(form.Q)) {
-				continue
-			}
 
 			//if stream.URL == pusher.RTSPClient.URL {
 			//	if stream.Status {
@@ -167,19 +159,14 @@ func (h *APIHandler) Players(c *gin.Context) {
 	//hostname := utils.GetRequestHostname(c.Request)
 	_players := make([]interface{}, 0)
 	for i := 0; i < len(players); i++ {
-		player := players[i]
-		//port := player.Server.TCPPort
-		//rtsp := fmt.Sprintf("rtsp://%s:%d%s", hostname, port, player.Path)
-		//if port == 554 {
-		//	rtsp = fmt.Sprintf("rtsp://%s%s", hostname, player.Path)
-		//}
+		//player := players[i]
 		_players = append(_players, map[string]interface{}{
-			"id": player.ID,
-			//"path":      rtsp,
-			"transType": player.TransType.String(),
-			"inBytes":   player.InBytes,
-			"outBytes":  player.OutBytes,
-			"startAt":   utils.DateTime(player.StartAt),
+			"id": "player.ID",
+
+			"transType": "player.TransType.String()",
+			"inBytes":   "player.InBytes",
+			"outBytes":  "player.OutBytes",
+			"startAt":   "utils.DateTime(player.StartAt)",
 		})
 	}
 	pr := utils.NewPageResult(_players)

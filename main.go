@@ -69,12 +69,6 @@ func (p *program) StartRTSP() (err error) {
 		err = fmt.Errorf("RTSP Server Not Found")
 		return
 	}
-	//sport := ""
-	//if p.rtspPort != 554 {
-	//	sport = fmt.Sprintf(":%d", p.rtspPort)
-	//}
-	//link := fmt.Sprintf("rtsp://%s%s", utils.LocalIP(), sport)
-	//log.Println("rtsp server start -->", link)
 	go func() {
 		if err := p.rtspServer.Start(); err != nil {
 			log.Println("start rtsp server error", err)
@@ -102,10 +96,7 @@ func (p *program) Start(s service.Service) (err error) {
 		err = fmt.Errorf("HTTP port[%d] In Use", p.httpPort)
 		return
 	}
-	//if utils.IsPortInUse(p.rtspPort) {
-	//	err = fmt.Errorf("RTSP port[%d] In Use", p.rtspPort)
-	//	return
-	//}
+
 	// 初始化数据库和模型
 	err = models.Init()
 	if err != nil {
@@ -152,48 +143,12 @@ func (p *program) Start(s service.Service) (err error) {
 					agent = fmt.Sprintf("%s(%s)", agent, routers.BuildDateTime)
 				}
 
-				//client, err := rtsp.NewRTSPClient(rtsp.GetServer(), v.URL, int64(v.HeartbeatInterval)*1000, agent, v.TransRtpType)
-				//if err != nil {
-				//	continue
-				//}
-				//
-				//client.CustomPath = v.CustomPath
-				//switch v.TransType {
-				//case 1:
-				//	client.TransType = rtsp.TRANS_TYPE_UDP
-				//case 0:
-				//	client.TransType = rtsp.TRANS_TYPE_TCP
-				//default:
-				//	client.TransType = rtsp.TRANS_TYPE_TCP
-				//}
-
 				pusher := rtsp.NewClientPusher()
-				if rtsp.GetServer().GetPusher(pusher.Path()) != nil {
+				if rtsp.GetServer().GetPusher(pusher.Path) != nil {
 					continue
 				}
 				if v.Status {
-					//err, newPath := client.Start(time.Duration(v.IdleTimeout) * time.Second)
-					//if newPath != "" {
-					//client, err = rtsp.NewRTSPClient(rtsp.GetServer(), newPath, int64(v.HeartbeatInterval)*1000, agent, v.TransRtpType)
-					//client.CustomPath = v.CustomPath
-					//switch v.TransType {
-					//case 1:
-					//	client.TransType = rtsp.TRANS_TYPE_UDP
-					//case 0:
-					//	client.TransType = rtsp.TRANS_TYPE_TCP
-					//default:
-					//	client.TransType = rtsp.TRANS_TYPE_TCP
-					//}
-					//	err, newPath = client.Start(time.Duration(v.IdleTimeout) * time.Second)
-					//	if err != nil {
-					//		log.Printf("Pull stream err :%v", err)
-					//		return
-					//	}
-					//}
-					//if err != nil {
-					//	log.Printf("Pull stream err :%v", err)
-					//	return
-					//}
+
 					rtsp.GetServer().AddPusher(pusher)
 				}
 				//streams = streams[0:i]
@@ -241,8 +196,7 @@ func main() {
 	httpPort := utils.Conf().Section("http").Key("port").MustInt(10008)
 	rtspServer := rtsp.GetServer()
 	p := &program{
-		httpPort: httpPort,
-		//rtspPort:   rtspServer.TCPPort,
+		httpPort:   httpPort,
 		rtspServer: rtspServer,
 	}
 	s, err := service.New(p, svcConfig)

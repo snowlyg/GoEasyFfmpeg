@@ -9,8 +9,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
-	"time"
 )
 
 /**
@@ -104,18 +102,15 @@ func (h *APIHandler) StreamStop(c *gin.Context) {
 	stream := getStream(form.ID)
 	pushers := rtsp.GetServer().GetPushers()
 	for _, v := range pushers {
-		//if v.URL() == stream.URL {
 		v.Stop()
 		rtsp.GetServer().RemovePusher(v)
 		c.IndentedJSON(200, "OK")
 		log.Printf("Stop %v success ", v)
-		//if v.RTSPClient != nil {
+
 		stream.Status = false
 		stream.StreamId = ""
 		db.SQLite.Save(stream)
-		//}
 		return
-		//}
 	}
 
 	c.AbortWithStatusJSON(http.StatusBadRequest, fmt.Sprintf("Pusher[%s] not found", stream.StreamId))
@@ -164,14 +159,11 @@ func (h *APIHandler) StreamStart(c *gin.Context) {
 	log.Printf("Pull to push %v success ", stream.StreamId)
 	rtsp.GetServer().AddPusher(pusher)
 
-	//if pusher.RTSPClient != nil && !pusher.Stoped() {
-	stream.StreamId = pusher.ID()
+	stream.StreamId = pusher.ID
 	stream.Status = true
 	db.SQLite.Save(stream)
 	c.IndentedJSON(200, "OK")
-	log.Printf("Start %v success ", pusher)
 	return
-	//}
 
 	c.AbortWithStatusJSON(http.StatusBadRequest, fmt.Sprintf("Pusher[%s] not found or not start", form.ID))
 }

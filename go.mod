@@ -10,6 +10,7 @@ require (
 	github.com/gin-contrib/pprof v1.3.0
 	github.com/gin-contrib/static v0.0.0-20191128031702-f81c604d8ac2
 	github.com/gin-gonic/gin v1.6.3
+	github.com/go-cmd/cmd v1.2.0
 	github.com/go-ini/ini v1.56.0
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/go-redis/redis v6.15.8+incompatible
@@ -24,7 +25,6 @@ require (
 	github.com/lestrrat-go/strftime v1.0.1 // indirect
 	github.com/onsi/ginkgo v1.12.2 // indirect
 	github.com/penggy/cors v0.0.0-20180918145040-d08bb28f7e48
-	github.com/pixelbender/go-sdp v1.0.0
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/shirou/gopsutil v2.20.4+incompatible
 	github.com/smartystreets/goconvey v1.6.4 // indirect
