@@ -2,8 +2,8 @@ package routers
 
 import (
 	"fmt"
-	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/db"
-	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/utils"
+	"github.com/snowlyg/GoEasyFfmpeg/extend/EasyGoLib/db"
+	"github.com/snowlyg/GoEasyFfmpeg/extend/EasyGoLib/utils"
 	"log"
 	"net/http"
 	"runtime"
@@ -13,9 +13,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/mem"
-	"github.com/snowlyg/go-rtsp-server/extend/sessions"
-	"github.com/snowlyg/go-rtsp-server/models"
-	"github.com/snowlyg/go-rtsp-server/rtsp"
+	"github.com/snowlyg/GoEasyFfmpeg/extend/sessions"
+	"github.com/snowlyg/GoEasyFfmpeg/models"
+	"github.com/snowlyg/GoEasyFfmpeg/rtsp"
 )
 
 /**

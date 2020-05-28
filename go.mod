@@ -1,4 +1,4 @@
-module github.com/snowlyg/go-rtsp-server
+module github.com/snowlyg/GoEasyFfmpeg
 
 go 1.14
 

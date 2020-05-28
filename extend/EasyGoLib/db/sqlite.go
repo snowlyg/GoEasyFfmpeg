@@ -6,7 +6,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/utils"
+	"github.com/snowlyg/GoEasyFfmpeg/extend/EasyGoLib/utils"
 )
 
 type Model struct {

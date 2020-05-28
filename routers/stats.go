@@ -2,14 +2,14 @@ package routers
 
 import (
 	"fmt"
-	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/db"
-	"github.com/snowlyg/go-rtsp-server/models"
+	"github.com/snowlyg/GoEasyFfmpeg/extend/EasyGoLib/db"
+	"github.com/snowlyg/GoEasyFfmpeg/models"
 	"log"
 	//"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/utils"
-	"github.com/snowlyg/go-rtsp-server/rtsp"
+	"github.com/snowlyg/GoEasyFfmpeg/extend/EasyGoLib/utils"
+	"github.com/snowlyg/GoEasyFfmpeg/rtsp"
 )
 
 /**

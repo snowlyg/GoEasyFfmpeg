@@ -9,14 +9,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/db"
+	"github.com/snowlyg/GoEasyFfmpeg/extend/EasyGoLib/db"
 
 	figure "github.com/common-nighthawk/go-figure"
 	"github.com/kardianos/service"
-	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/utils"
-	"github.com/snowlyg/go-rtsp-server/models"
-	"github.com/snowlyg/go-rtsp-server/routers"
-	"github.com/snowlyg/go-rtsp-server/rtsp"
+	"github.com/snowlyg/GoEasyFfmpeg/extend/EasyGoLib/utils"
+	"github.com/snowlyg/GoEasyFfmpeg/models"
+	"github.com/snowlyg/GoEasyFfmpeg/routers"
+	"github.com/snowlyg/GoEasyFfmpeg/rtsp"
 )
 
 var (

@@ -26,7 +26,7 @@
 
 ## 安装部署
 
-- [下载解压 release 包](https://github.com/snowlyg/go-rtsp-server/releases)
+- [下载解压 release 包](https://github.com/snowlyg/GoEasyFfmpeg/releases)
 
 - 直接运行(Windows)
 
@@ -92,7 +92,7 @@
 
         cd $GOPATH/src/github.com
         mkdir EasyDarwin && cd EasyDarwin
-        git clone https://github.com/snowlyg/go-rtsp-server.git --depth=1 EasyDarwin
+        git clone https://github.com/snowlyg/GoEasyFfmpeg.git --depth=1 EasyDarwin
         cd EasyDarwin
 
 - 以开发模式运行

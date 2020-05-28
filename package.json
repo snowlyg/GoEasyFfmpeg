@@ -1,5 +1,5 @@
 {
-  "name": "easydarwin",
+  "name": "goeasyffmpeg",
   "version": "9.0.0",
   "description": "EasyDarwin Open Source Media Server",
   "main": "index.js",
@@ -7,17 +7,17 @@
     "build:ico": "rsrc -arch amd64 -ico ed.ico -o EasyDarwin_windows.syso",
     "build:www": "cd web_src && npm run build && cd .. && apidoc -i routers -o www/apidoc",
     "build:doc": "apidoc -i routers -o www/apidoc",
-    "build:win": "go build -tags release -ldflags \"-s -w\" -o EasyDarwin.exe",
-    "build:lin": "go build -tags release -ldflags \"-X 'main.buildDateTime=$(date '+%Y-%m-%d %H:%M:%S')' -X 'main.gitCommitCode=$(git rev-list --full-history --all --abbrev-commit --max-count 1)' -s -w\" -o easydarwin",
-    "build:dev": "go build -o EasyDarwin.exe",
-    "dev": "gobuild -o EasyDarwin.exe",
-    "dev:lin": "gobuild -o easydarwin",
+    "build:win": "go build -tags release -ldflags \"-s -w\" -o GoEasyFfmpeg.exe",
+    "build:lin": "go build -tags release -ldflags \"-X 'main.buildDateTime=$(date '+%Y-%m-%d %H:%M:%S')' -X 'main.gitCommitCode=$(git rev-list --full-history --all --abbrev-commit --max-count 1)' -s -w\" -o goeasyffmpeg",
+    "build:dev": "go build -o GoEasyFfmpeg.exe",
+    "dev": "gobuild -o GoEasyFfmpeg.exe",
+    "dev:lin": "gobuild -o goeasyffmpeg",
     "dev:www": "cd web_src && npm run start",
-    "clean": "rimraf EasyDarwin.exe EasyDarwin.exe~ easydarwin"
+    "clean": "rimraf GoEasyFfmpeg.exe GoEasyFfmpeg.exe~ goeasyffmpeg"
   },
   "apidoc": {
-    "name": "EasyDarwin",
-    "title": "EasyDarwin API Reference",
+    "name": "GoEasyFfmpeg",
+    "title": "GoEasyFfmpeg API Reference",
     "order": [
       "stats",
       "Pushers",
@@ -41,9 +41,9 @@
   "license": "ISC",
   "pack": [
     {
-      "name": "EasyDarwin-windows",
+      "name": "GoEasyFfmpeg-windows",
       "format": "zip",
-      "pattern": "{www/**,EasyDarwin.exe,ServiceInstall-EasyDarwin.exe,ServiceUninstall-EasyDarwin.exe,easydarwin.ini}",
+      "pattern": "{www/**,GoEasyFfmpeg.exe,ServiceInstall-EasyDarwin.exe,ServiceUninstall-EasyDarwin.exe,easydarwin.ini}",
       "options": {
         "dot": true,
         "ignore": [
@@ -52,9 +52,9 @@
       }
     },
     {
-      "name": "EasyDarwin-linux",
+      "name": "GoEasyFfmpeg-linux",
       "format": "tar",
-      "pattern": "{www/**,easydarwin,easydarwin.ini,*.sh}",
+      "pattern": "{www/**,goeasyffmpeg,easydarwin.ini,*.sh}",
       "options": {
         "dot": true,
         "ignore": [

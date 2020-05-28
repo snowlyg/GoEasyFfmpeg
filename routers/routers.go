@@ -7,14 +7,14 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/db"
+	"github.com/snowlyg/GoEasyFfmpeg/extend/EasyGoLib/db"
 
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/penggy/cors"
-	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/utils"
-	"github.com/snowlyg/go-rtsp-server/extend/sessions"
+	"github.com/snowlyg/GoEasyFfmpeg/extend/EasyGoLib/utils"
+	"github.com/snowlyg/GoEasyFfmpeg/extend/sessions"
 	validator "gopkg.in/go-playground/validator.v8"
 )
 
