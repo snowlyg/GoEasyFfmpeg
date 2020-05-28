@@ -18,7 +18,7 @@ type Pusher struct {
 }
 
 // NewClientPusher 新建推流器客户端
-func NewClientPusher(id uint, path, source string) (pusher *Pusher) {
+func NewClientPusher(id uint, source, path string) (pusher *Pusher) {
 	pusher = &Pusher{
 		ID:      id,
 		Path:    path,

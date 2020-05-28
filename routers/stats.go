@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"fmt"
 	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/db"
 	"github.com/snowlyg/go-rtsp-server/models"
 	"log"
@@ -66,7 +67,6 @@ func (h *APIHandler) Pushers(c *gin.Context) {
 		var outBytes int
 		var startAt string
 		var url string
-		var path string
 		var onlines int
 		statusText := "已停止"
 
@@ -78,21 +78,28 @@ func (h *APIHandler) Pushers(c *gin.Context) {
 						statusText = "已启动"
 					}
 				}
-				url = v.Source
-				path = v.Path
 			}
+		}
+
+		url = fmt.Sprintf("rtmp://%s:1935/live/%v", "localhost", stream.RoomName)
+		if stream.TransType == "RTMP" {
+			url = fmt.Sprintf("rtmp://%s:1935/live/%v", "localhost", stream.RoomName)
+		} else if stream.TransType == "HLS" {
+			url = fmt.Sprintf("rtmp://%s:7002/live/%v.mu38", "localhost", stream.RoomName)
+		} else if stream.TransType == "FLV" {
+			url = fmt.Sprintf("rtmp://%s:7001/live/%v.flv", "localhost", stream.RoomName)
 		}
 
 		pushers = append(pushers, map[string]interface{}{
 			"id":        stream.ID,
-			"url":       url,
-			"path":      path,
-			"source":    stream.URL,
+			"url":       url,        //  播放地址
+			"source":    stream.URL, // 源地址
 			"transType": stream.TransType,
 			"inBytes":   inBytes,
 			"outBytes":  outBytes,
 			"startAt":   startAt,
 			"onlines":   onlines,
+			"roomName":  stream.RoomName,
 			"status":    statusText,
 		})
 	}

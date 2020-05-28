@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/db"
+	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/utils"
 	"github.com/snowlyg/go-rtsp-server/models"
 	"github.com/snowlyg/go-rtsp-server/rtsp"
 	"log"
@@ -28,13 +29,11 @@ import (
  */
 func (h *APIHandler) StreamAdd(c *gin.Context) {
 	type Form struct {
-		Id                uint   `form:"id" `
-		URL               string `form:"source" binding:"required"`
-		CustomPath        string `form:"customPath"`
-		TransType         string `form:"transType"`
-		TransRtpType      string `form:"transRtpType"`
-		IdleTimeout       int    `form:"idleTimeout"`
-		HeartbeatInterval int    `form:"heartbeatInterval"`
+		Id         uint   `form:"id" `
+		URL        string `form:"source" binding:"required"`
+		CustomPath string `form:"customPath"`
+		TransType  string `form:"transType"`
+		RoomName   string `form:"roomName"` // livego room
 	}
 	var form Form
 	err := c.Bind(&form)
@@ -43,29 +42,32 @@ func (h *APIHandler) StreamAdd(c *gin.Context) {
 		return
 	}
 
-	transType := 0
-	if form.TransType == "TCP" {
-		transType = 0
-	} else if form.TransType == "UDP" {
-		transType = 1
+	// 获取 room key
+	re, err := utils.GetHttp(form.RoomName)
+	if err != nil {
+		log.Printf("Pull to push err:%v", err)
 	}
+	customPath := fmt.Sprintf("rtmp://localhost:1935/%s/%s", "live", re.Data)
 
 	// save to db.
 	oldStream := models.Stream{}
 	if db.SQLite.Where("id = ? ", form.Id).First(&oldStream).RecordNotFound() {
-
 		stream := models.Stream{
 			URL:        form.URL,
-			CustomPath: form.CustomPath,
-			TransType:  transType,
+			CustomPath: customPath, // 请求地址
+			TransType:  form.TransType,
+			RoomName:   form.RoomName,
+			RoomKey:    re.Data,
 			Status:     false,
 		}
 		db.SQLite.Create(&stream)
 		c.IndentedJSON(200, stream)
 	} else {
 		oldStream.URL = form.URL
-		oldStream.CustomPath = form.CustomPath
-		oldStream.TransType = transType
+		oldStream.CustomPath = customPath
+		oldStream.TransType = form.TransType
+		oldStream.RoomName = form.RoomName
+		oldStream.RoomKey = re.Data
 		oldStream.Status = false
 		db.SQLite.Save(oldStream)
 		c.IndentedJSON(200, oldStream)
@@ -97,7 +99,7 @@ func (h *APIHandler) StreamStop(c *gin.Context) {
 	stream.Status = false
 	db.SQLite.Save(stream)
 	if !stream.Status {
-		pusher := rtsp.GetServer().GetPusher(stream.URL)
+		pusher := rtsp.GetServer().GetPusher(stream.CustomPath)
 		pusher.Stoped = true
 		rtsp.GetServer().RemovePusher(pusher)
 		c.IndentedJSON(200, "OK")
@@ -136,21 +138,24 @@ func (h *APIHandler) StreamStart(c *gin.Context) {
 	}
 
 	stream := getStream(form.ID)
-	agent := fmt.Sprintf("EasyDarwinGo/%s", BuildVersion)
-	if BuildDateTime != "" {
-		agent = fmt.Sprintf("%s(%s)", agent, BuildDateTime)
-	}
-
-	p := rtsp.GetServer().GetPusher(stream.URL)
+	p := rtsp.GetServer().GetPusher(stream.CustomPath)
 	if p != nil {
 		rtsp.GetServer().RemovePusher(p)
 	}
 
-	pusher := rtsp.NewClientPusher(stream.ID, stream.URL, stream.CustomPath)
-	stream.Status = true
-	db.SQLite.Save(stream)
+	// 获取 room key
+	re, err := utils.GetHttp(stream.RoomName)
+	if err != nil {
+		log.Printf("Pull to push err:%v", err)
+	}
+	customPath := fmt.Sprintf("rtmp://localhost:1935/%s/%s", "live", re.Data)
 
+	stream.Status = true
+	stream.RoomKey = re.Data
+	stream.CustomPath = customPath
+	db.SQLite.Save(stream)
 	if stream.Status {
+		pusher := rtsp.NewClientPusher(stream.ID, stream.URL, stream.CustomPath)
 		pusher.Stoped = false
 		rtsp.GetServer().AddPusher(pusher)
 		c.IndentedJSON(200, "OK")

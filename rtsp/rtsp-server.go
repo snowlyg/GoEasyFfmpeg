@@ -1,12 +1,15 @@
 package rtsp
 
 import (
+	"fmt"
 	"github.com/snowlyg/go-rtsp-server/extend/EasyGoLib/utils"
 	"log"
 	"os"
 	"os/exec"
+	"path"
 	"sync"
 	"syscall"
+	"time"
 )
 
 type Server struct {
@@ -35,78 +38,68 @@ func GetServer() *Server {
 // Start 启动
 func (server *Server) Start() (err error) {
 	logger := server.logger
-
-	localRecord := utils.Conf().Section("rtsp").Key("save_stream_to_local").MustInt(0)
 	ffmpeg := utils.Conf().Section("rtsp").Key("ffmpeg_path").MustString("")
 	m3u8DirPath := utils.Conf().Section("rtsp").Key("m3u8_dir_path").MustString("")
 
-	SaveStreamToLocal := false
-	if (len(ffmpeg) > 0) && localRecord > 0 && len(m3u8DirPath) > 0 {
-		err := utils.EnsureDir(m3u8DirPath)
-		if err != nil {
-			logger.Printf("Create m3u8_dir_path[%s] err:%v.", m3u8DirPath, err)
-		} else {
-			SaveStreamToLocal = true
-		}
-	}
-
 	go func() { // 保持到本地
 		pusher2FfmpegMap := make(map[*Pusher]*exec.Cmd)
-		if SaveStreamToLocal {
-			logger.Printf("Prepare to save stream to local....")
-			defer logger.Printf("End save stream to local....")
-		}
+		logger.Printf("Prepare to save stream to local....")
+		defer logger.Printf("End save stream to local....")
 		var pusher *Pusher
 		addChnOk := true
 		removeChnOk := true
 		for addChnOk || removeChnOk {
 			select {
 			case pusher, addChnOk = <-server.addPusherCh:
-				if SaveStreamToLocal {
-					if addChnOk {
-
-						params := []string{"-i", pusher.Source, "-strict", "-2", "-vcodec", "h264", "-acodec", "aac", "-f", "flv", pusher.Path}
-						cmd := exec.Command(ffmpeg, params...)
-						err = cmd.Start()
-						if err != nil {
-							logger.Printf("Start ffmpeg err:%v", err)
-						}
-
-						if err := cmd.Wait(); err != nil {
-							log.Printf("Cmd returned error: %v", err)
-						}
-
-						pusher2FfmpegMap[pusher] = cmd
-						logger.Printf("add ffmpeg [%v] to pull stream from pusher[%v]", cmd, pusher)
-					} else {
-						logger.Printf("addPusherChan closed")
+				if addChnOk {
+					dir := path.Join(m3u8DirPath, "logs", time.Now().Format("20060102"))
+					err := utils.EnsureDir(dir)
+					if err != nil {
+						logger.Printf("EnsureDir:[%s] err:%v.", dir, err)
+						continue
 					}
+					params := []string{"-i", pusher.Source, "-strict", "-2", "-vcodec", "h264", "-acodec", "aac", "-f", "flv", pusher.Path}
+
+					cmd := exec.Command(ffmpeg, params...)
+					f, err := os.OpenFile(path.Join(dir, fmt.Sprintf("log.txt")), os.O_RDWR|os.O_CREATE, 0755)
+					if err == nil {
+						cmd.Stdout = f
+						cmd.Stderr = f
+					}
+					err = cmd.Start()
+					if err != nil {
+						logger.Printf("Start ffmpeg err:%v", err)
+					}
+
+					pusher2FfmpegMap[pusher] = cmd
+					logger.Printf("add ffmpeg [%v] to pull stream from pusher[%v]", cmd, pusher)
+
+				} else {
+					logger.Printf("addPusherChan closed")
 				}
 			case pusher, removeChnOk = <-server.removePusherCh:
-				if SaveStreamToLocal {
-					if removeChnOk {
-						cmd := pusher2FfmpegMap[pusher]
+				if removeChnOk {
+					cmd := pusher2FfmpegMap[pusher]
+					proc := cmd.Process
+					if proc != nil {
+						logger.Printf("prepare to SIGTERM to process:%v", proc)
+						proc.Signal(syscall.SIGTERM)
+						proc.Wait()
+
+						logger.Printf("process:%v terminate.", proc)
+					}
+					delete(pusher2FfmpegMap, pusher)
+					logger.Printf("delete ffmpeg from pull stream from pusher[%v]", pusher)
+				} else {
+					for _, cmd := range pusher2FfmpegMap {
 						proc := cmd.Process
 						if proc != nil {
 							logger.Printf("prepare to SIGTERM to process:%v", proc)
 							proc.Signal(syscall.SIGTERM)
-							proc.Wait()
-
-							logger.Printf("process:%v terminate.", proc)
 						}
-						delete(pusher2FfmpegMap, pusher)
-						logger.Printf("delete ffmpeg from pull stream from pusher[%v]", pusher)
-					} else {
-						for _, cmd := range pusher2FfmpegMap {
-							proc := cmd.Process
-							if proc != nil {
-								logger.Printf("prepare to SIGTERM to process:%v", proc)
-								proc.Signal(syscall.SIGTERM)
-							}
-						}
-						pusher2FfmpegMap = make(map[*Pusher]*exec.Cmd)
-						logger.Printf("removePusherChan closed")
 					}
+					pusher2FfmpegMap = make(map[*Pusher]*exec.Cmd)
+					logger.Printf("removePusherChan closed")
 				}
 			}
 		}

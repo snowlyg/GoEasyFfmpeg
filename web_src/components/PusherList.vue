@@ -179,7 +179,7 @@
                 return prettyBytes(val);
             },
             stop(row) {
-                this.$confirm(`确认停止 ${row.path} ?`, "提示").then(() => {
+                this.$confirm(`确认停止 ${row.id} ?`, "提示").then(() => {
                     $.get("/api/v1/stream/stop", {
                         id: row.id
                     }).then(data => {
@@ -189,7 +189,7 @@
                 });
             },
             start(row) {
-                this.$confirm(`确认启动 ${row.path} ?`, "提示").then(() => {
+                this.$confirm(`确认启动 ${row.id} ?`, "提示").then(() => {
                     $.get("/api/v1/stream/start", {
                         id: row.id
                     }).then(data => {
@@ -199,7 +199,7 @@
                 });
             },
             del(row) {
-                this.$confirm(`确认删除 ${row.path} ?`, "提示").then(() => {
+                this.$confirm(`确认删除 ${row.id} ?`, "提示").then(() => {
                     $.get("/api/v1/stream/del", {
                         id: row.id
                     }).then(data => {

@@ -108,21 +108,22 @@ func (p *program) Start(s service.Service) (err error) {
 		return
 	}
 
-	_ = p.StartRTSP()
 	_ = p.StartHTTP()
+	_ = p.StartRTSP()
 
 	if !utils.Debug {
 		log.Println("log files -->", utils.LogDir())
 		log.SetOutput(utils.GetLogWriter())
 	}
+
 	go func() {
 		for range routers.API.RestartChan {
 			_ = p.StopHTTP()
 			_ = p.StopRTSP()
 			// 重载配置
 			utils.ReloadConf()
-			_ = p.StartRTSP()
 			_ = p.StartHTTP()
+			_ = p.StartRTSP()
 		}
 	}()
 
@@ -138,16 +139,12 @@ func (p *program) Start(s service.Service) (err error) {
 
 			for i := len(streams) - 1; i > -1; i-- {
 				v := streams[i]
-				agent := fmt.Sprintf("EasyDarwinGo/%s", routers.BuildVersion)
-				if routers.BuildDateTime != "" {
-					agent = fmt.Sprintf("%s(%s)", agent, routers.BuildDateTime)
-				}
-
 				pusher := rtsp.NewClientPusher(v.ID, v.URL, v.CustomPath)
 				if rtsp.GetServer().GetPusher(pusher.Path) != nil {
 					continue
 				}
 				if v.Status {
+					pusher.Stoped = false
 					rtsp.GetServer().AddPusher(pusher)
 				}
 				//streams = streams[0:i]

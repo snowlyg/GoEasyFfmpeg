@@ -14,6 +14,7 @@ require (
 	github.com/go-ini/ini v1.56.0
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/go-redis/redis v6.15.8+incompatible
+	github.com/golang/protobuf v1.4.2
 	github.com/gorilla/context v1.1.1
 	github.com/gorilla/securecookie v1.1.1
 	github.com/gorilla/sessions v1.2.0
