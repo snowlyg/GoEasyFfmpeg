@@ -79,13 +79,14 @@ func (h *APIHandler) Pushers(c *gin.Context) {
 
 		}
 
-		url = fmt.Sprintf("rtmp://%s:1935/live/%v", "localhost", stream.RoomName)
+		outputIp := utils.Conf().Section("rtsp").Key("out_put_ip").MustString("localhost")
+		url = fmt.Sprintf("rtmp://%s:1935/live/%v", outputIp, stream.RoomName)
 		if stream.TransType == "RTMP" {
-			url = fmt.Sprintf("rtmp://%s:1935/live/%v", "localhost", stream.RoomName)
+			url = fmt.Sprintf("rtmp://%s:1935/live/%v", outputIp, stream.RoomName)
 		} else if stream.TransType == "HLS" {
-			url = fmt.Sprintf("rtmp://%s:7002/live/%v.mu38", "localhost", stream.RoomName)
+			url = fmt.Sprintf("rtmp://%s:7002/live/%v.mu38", outputIp, stream.RoomName)
 		} else if stream.TransType == "FLV" {
-			url = fmt.Sprintf("rtmp://%s:7001/live/%v.flv", "localhost", stream.RoomName)
+			url = fmt.Sprintf("rtmp://%s:7001/live/%v.flv", outputIp, stream.RoomName)
 		}
 
 		pushers = append(pushers, map[string]interface{}{

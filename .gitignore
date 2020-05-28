@@ -12,11 +12,8 @@ node_modules
 /*.dev.ini
 /*.dev.db
 .idea
-easydarwin_debug.ini
 .DS_Store
 Unnamed
-dev.ini
 debug
-debug.ini
-easydarwin.ini
+*.ini
 www/

@@ -31,8 +31,13 @@ type getRe struct {
 
 func GetHttpCustomPath(roomName string) (string, error) {
 	var re getRe
+	outputIp := Conf().Section("rtsp").Key("out_put_ip").MustString("localhost")
 
-	roomKeyPath := fmt.Sprintf("http://localhost:8090/control/get?room=%v", roomName)
+	println("================")
+	println(outputIp)
+	println("================")
+
+	roomKeyPath := fmt.Sprintf("http://%s:8090/control/get?room=%v", outputIp, roomName)
 	response, err := http.Get(roomKeyPath)
 	if err != nil {
 		return "", err
@@ -45,7 +50,6 @@ func GetHttpCustomPath(roomName string) (string, error) {
 
 	json.Unmarshal(body, &re)
 
-	outputIp := Conf().Section("rtsp").Key("output_ip").MustString("localhost")
 	customPath := fmt.Sprintf("rtmp://%s:1935/%s/%s", outputIp, "live", re.Data)
 
 	return customPath, nil
