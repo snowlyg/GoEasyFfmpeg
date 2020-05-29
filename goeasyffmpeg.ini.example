@@ -2,9 +2,11 @@
 port=10008
 default_username=admin
 default_password=admin
+network_buffer=2048000
+debug_log_enable=1
 
 [rtsp]
-port=554
+out_put_ip=10.0.1.65
 
 ; rtsp 超时时间，包括RTSP建立连接与数据收发。
 timeout=28800
@@ -24,9 +26,6 @@ keep_players=0
 ; password should be the hex of md5(original password)
 authorization_enable=0
 
-; 是否使能推送的同事进行本地存储，使能后则可以进行录像查询与回放。
-save_stream_to_local=1
-
 ;easydarwin使用ffmpeg工具来进行存储。这里表示ffmpeg的可执行程序的路径
 ffmpeg_path=ffmpeg
 
@@ -37,5 +36,6 @@ m3u8_dir_path=C:\Users\Administrator\go\src\github.com\snowlyg\EasyDarwinGoM3u8
 ;如果需要直播，这个值设小点，但是这样会产生很多ts文件；如果不需要直播，只要存储的话，可设大些。
 ts_duration_second=6
 
-;key为拉流时的自定义路径，value为 ffmpeg 转码格式，比如可设置为 -strict -2 -threads 2 -c:v copy -c:a copy -f rtsp ，表示copy源格式；default 表示使用  -strict -2 -threads 2 -c:v copy -c:a copy -f rtsp 不转码。
+;value为 ffmpeg 转码格式，比如可设置为 -strict -2 -threads 2 -c:v copy -c:a copy -f rtsp ，表示copy源格式；default 表示使用  -strict -2 -threads 2 -c:v copy -c:a copy -f rtsp 不转码。
+;最后一个参数 rtsp 为推流服务器类型，可选 rtsp ,rtmp
 decoder=-strict -2 -threads 2 -c:v copy -c:a copy -f rtsp

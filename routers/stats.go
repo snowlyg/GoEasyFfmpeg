@@ -72,9 +72,10 @@ func (h *APIHandler) Pushers(c *gin.Context) {
 						statusText = "已启动"
 					}
 				}
+				startAt = stream.UpdatedAt.String()
+			} else {
+				startAt = "-"
 			}
-			startAt = stream.UpdatedAt.String()
-
 		}
 
 		pushers = append(pushers, map[string]interface{}{
