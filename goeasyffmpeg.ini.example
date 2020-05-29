@@ -37,5 +37,5 @@ m3u8_dir_path=C:\Users\Administrator\go\src\github.com\snowlyg\EasyDarwinGoM3u8
 ;如果需要直播，这个值设小点，但是这样会产生很多ts文件；如果不需要直播，只要存储的话，可设大些。
 ts_duration_second=6
 
-;key为拉流时的自定义路径，value为 ffmpeg 转码格式，比如可设置为 -strict -2 -threads 2 -c:v copy -c:a copy -f flv ，表示copy源格式；default 表示使用  -strict -2 -threads 2 -c:v copy -c:a copy -f flv 不转码。
-decoder=-strict -2 -threads 2 -c:v copy -c:a copy -f flv
+;key为拉流时的自定义路径，value为 ffmpeg 转码格式，比如可设置为 -strict -2 -threads 2 -c:v copy -c:a copy -f rtsp ，表示copy源格式；default 表示使用  -strict -2 -threads 2 -c:v copy -c:a copy -f rtsp 不转码。
+decoder=-strict -2 -threads 2 -c:v copy -c:a copy -f rtsp

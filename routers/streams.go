@@ -150,7 +150,7 @@ func (h *APIHandler) StreamStart(c *gin.Context) {
 	stream.CustomPath = customPath
 	db.SQLite.Save(stream)
 	if stream.Status {
-		pusher := rtsp.NewClientPusher(stream.ID, stream.URL, stream.CustomPath)
+		pusher := rtsp.NewClientPusher(stream.ID, stream.URL, customPath)
 		pusher.Stoped = false
 		rtsp.GetServer().AddPusher(pusher)
 		c.IndentedJSON(200, "OK")
