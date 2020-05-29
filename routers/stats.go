@@ -1,7 +1,6 @@
 package routers
 
 import (
-	"fmt"
 	"github.com/snowlyg/GoEasyFfmpeg/extend/EasyGoLib/db"
 	"github.com/snowlyg/GoEasyFfmpeg/models"
 	"log"
@@ -64,7 +63,6 @@ func (h *APIHandler) Pushers(c *gin.Context) {
 	pushers := make([]interface{}, 0)
 	for _, stream := range streams {
 		var startAt string
-		var url string
 		statusText := "已停止"
 		rIPushers := rtsp.Instance.GetPushers()
 		for _, v := range rIPushers {
@@ -79,20 +77,10 @@ func (h *APIHandler) Pushers(c *gin.Context) {
 
 		}
 
-		outputIp := utils.Conf().Section("rtsp").Key("out_put_ip").MustString("localhost")
-		url = fmt.Sprintf("rtmp://%s:1935/live/%v", outputIp, stream.RoomName)
-		if stream.TransType == "RTMP" {
-			url = fmt.Sprintf("rtmp://%s:1935/live/%v", outputIp, stream.RoomName)
-		} else if stream.TransType == "HLS" {
-			url = fmt.Sprintf("rtmp://%s:7002/live/%v.mu38", outputIp, stream.RoomName)
-		} else if stream.TransType == "FLV" {
-			url = fmt.Sprintf("rtmp://%s:7001/live/%v.flv", outputIp, stream.RoomName)
-		}
-
 		pushers = append(pushers, map[string]interface{}{
 			"id":        stream.ID,
-			"url":       url,        //  播放地址
-			"source":    stream.URL, // 源地址
+			"url":       utils.GetOutPutUrl(stream.RoomName, stream.TransType), //  播放地址
+			"source":    stream.URL,                                            // 源地址
 			"transType": stream.TransType,
 			"startAt":   startAt,
 			"roomName":  stream.RoomName,

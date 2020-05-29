@@ -134,9 +134,9 @@
         },
         mounted() {
             this.$refs["q"].focus();
-            // this.timer = setInterval(() => {
-            //     this.getPushers();
-            // }, 3000);
+            this.timer = setInterval(() => {
+                this.getPushers();
+            }, 3000);
         },
         watch: {
             q: function (newVal, oldVal) {
