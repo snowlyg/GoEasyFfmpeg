@@ -10,11 +10,10 @@ require (
 	github.com/gin-contrib/pprof v1.3.0
 	github.com/gin-contrib/static v0.0.0-20191128031702-f81c604d8ac2
 	github.com/gin-gonic/gin v1.6.3
-	github.com/go-cmd/cmd v1.2.0
+	github.com/giorgisio/goav v0.1.0
 	github.com/go-ini/ini v1.56.0
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/go-redis/redis v6.15.8+incompatible
-	github.com/golang/protobuf v1.4.2
 	github.com/gorilla/context v1.1.1
 	github.com/gorilla/securecookie v1.1.1
 	github.com/gorilla/sessions v1.2.0
