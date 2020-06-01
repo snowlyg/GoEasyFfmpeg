@@ -62,8 +62,8 @@ func (server *Server) Start() (err error) {
 
 					paramStr := utils.Conf().Section("rtsp").Key("decoder").MustString("-strict -2 -threads 2 -c:v copy -c:a copy -f rtsp")
 					paramsOfThisPath := strings.Split(paramStr, " ")
-					params := []string{"-i", pusher.Source, pusher.Path}
-					params = append(params[:2], append(paramsOfThisPath, params[2:]...)...)
+					params := []string{"-rtsp_transport", "tcp", "-i", pusher.Source, pusher.Path}
+					params = append(params[:4], append(paramsOfThisPath, params[4:]...)...)
 
 					cmd := exec.Command(ffmpeg, params...)
 					f, err := os.OpenFile(path.Join(dir, fmt.Sprintf("log.txt")), os.O_RDWR|os.O_CREATE, 0755)

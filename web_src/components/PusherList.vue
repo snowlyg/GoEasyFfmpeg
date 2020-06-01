@@ -116,7 +116,7 @@
         data() {
             return {
                 q: "",
-                sort: "startAt",
+                sort: "Id",
                 order: "descending",
                 pushers: [],
                 total: 0,

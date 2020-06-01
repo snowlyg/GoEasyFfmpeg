@@ -37,5 +37,5 @@ m3u8_dir_path=C:\Users\Administrator\go\src\github.com\snowlyg\EasyDarwinGoM3u8
 ts_duration_second=6
 
 ;value为 ffmpeg 转码格式，比如可设置为 -strict -2 -threads 2 -c:v copy -c:a copy -f rtsp ，表示copy源格式；default 表示使用  -strict -2 -threads 2 -c:v copy -c:a copy -f rtsp 不转码。
-;最后一个参数 rtsp 为推流服务器类型，可选 rtsp ,rtmp
+;最后一个参数 rtsp 为推流服务器类型，可选 rtsp ,flv
 decoder=-strict -2 -threads 2 -c:v copy -c:a copy -f rtsp

@@ -19,7 +19,7 @@
             <label for="input-transport" class="col-sm-3 control-label"><span class="text-red">*</span>输出协议</label>
             <div class="col-sm-8">
                 <el-radio-group id="input-transport" v-model.trim="form.transType" size="mini">
-                    <el-radio-button label="RTSP"></el-radio-button>
+                    <el-radio-button label="RTMP"></el-radio-button>
                     <el-radio-button label="HLS"></el-radio-button>
                     <el-radio-button label="FLV"></el-radio-button>
                     <!-- <el-radio-button label="Multicast"></el-radio-button> -->
@@ -49,7 +49,7 @@ export default {
             return {
                 source: '',
                 roomName: '',
-                transType: 'RTSP',
+                transType: 'RTMP',
             }
         },
         onHide() {

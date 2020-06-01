@@ -34,7 +34,7 @@ func GetHttpCustomPath(roomName string) (string, error) {
 	var re getRe
 	outputIp := Conf().Section("rtsp").Key("out_put_ip").MustString("localhost")
 	customPath := ""
-	if getServerType() == "rtmp" {
+	if getServerType() == "flv" {
 		roomKeyPath := fmt.Sprintf("http://%s:8090/control/get?room=%v", outputIp, roomName)
 		response, err := http.Get(roomKeyPath)
 		if err != nil {
@@ -68,7 +68,7 @@ func getServerType() string {
 func GetOutPutUrl(roomName, transType string) string {
 	outputIp := Conf().Section("rtsp").Key("out_put_ip").MustString("localhost")
 	url := fmt.Sprintf("rtsp://%s:8554/%v", outputIp, roomName)
-	if getServerType() == "rtmp" {
+	if getServerType() == "flv" {
 		if transType == "RTMP" {
 			url = fmt.Sprintf("rtmp://%s:1935/live/%v", outputIp, roomName)
 		} else if transType == "HLS" {
