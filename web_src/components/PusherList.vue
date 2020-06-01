@@ -20,6 +20,8 @@
                         <button type="button" class="btn btn-sm btn-success"
                                 @click.prevent="$refs['pullRTSPDlg'].show()"><i class="fa fa-plus"></i> 拉流分发
                         </button>
+                        <button type="button" class="btn btn-sm btn-warning" @click.prevent="startAll()">启动</button>
+                        <button type="button" class="btn btn-sm btn-danger" @click="stopAll()">停止</button>
                     </div>
                     <div class="form-group pull-right">
                         <div class="input-group">
@@ -35,8 +37,12 @@
                 </form>
             </div>
             <div class="box-body">
-                <el-table :data="pushers" stripe class="view-list"
-                          :default-sort="{prop: 'Id', order: 'descending'}" @sort-change="sortChange">
+                <el-table :data="pushers" stripe class="view-list" :default-sort="{prop: 'Id', order: 'descending'}"
+                          @sort-change="sortChange" @selection-change="handleSelectionChange">
+                    <el-table-column
+                            type="selection"
+                            width="55">
+                    </el-table-column>
                     <el-table-column prop="id" label="ID" min-width="60"></el-table-column>
                     <el-table-column label="播放地址" min-width="240" show-overflow-tooltip>
                         <template slot-scope="scope">
@@ -124,6 +130,8 @@
                 pageSize: 10,
                 currentPage: 1,
                 streamInfo: {},
+                multipleSelection: [],
+                ids: "",
             };
         },
         beforeDestroy() {
@@ -134,9 +142,9 @@
         },
         mounted() {
             this.$refs["q"].focus();
-            this.timer = setInterval(() => {
-                this.getPushers();
-            }, 3000);
+            // this.timer = setInterval(() => {
+            this.getPushers();
+            // }, 3000);
         },
         watch: {
             q: function (newVal, oldVal) {
@@ -211,6 +219,30 @@
             },
             edit(row) {
                 this.$refs['editRTSPDlg'].show(row)
+            },
+            stopAll() {
+                for (let i = 0; i < this.multipleSelection.length; i++) {
+                    this.ids += this.multipleSelection[i].id+",";
+                }
+
+                $.post("/api/v1/stream/stopAll", {
+                    ids:  JSON.stringify(this.ids)
+                }).then(data => {
+                    this.getPushers();
+                })
+            },
+            startAll() {
+                for (let i = 0; i < this.multipleSelection.length; i++) {
+                    this.ids += this.multipleSelection[i].id + ",";
+                }
+                $.post("/api/v1/stream/startAll", {
+                    ids: JSON.stringify( this.ids)
+                }).then(data => {
+                    this.getPushers();
+                })
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
             }
         },
         beforeRouteEnter(to, from, next) {

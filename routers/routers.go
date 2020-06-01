@@ -144,6 +144,8 @@ func Init() (err error) {
 		api.GET("/stream/add", NeedLogin(), API.StreamAdd)
 		api.GET("/stream/start", NeedLogin(), API.StreamStart)
 		api.GET("/stream/stop", NeedLogin(), API.StreamStop)
+		api.POST("/stream/startAll", NeedLogin(), API.StreamStartAll)
+		api.POST("/stream/stopAll", NeedLogin(), API.StreamStopAll)
 		api.GET("/stream/del", NeedLogin(), API.StreamDel)
 
 		api.GET("/record/folders", NeedLogin(), API.RecordFolders)
