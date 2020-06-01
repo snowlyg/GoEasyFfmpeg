@@ -32,8 +32,7 @@ type getRe struct {
 
 func GetHttpCustomPath(roomName string) (string, error) {
 	var re getRe
-	roomName = strings.Replace(roomName, "/", "", -1)
-	roomName = strings.Replace(roomName, "\\", "", -1)
+	roomName = strings.Replace(strings.Replace(roomName, "\\", "", -1), "/", "", -1)
 	outputIp := Conf().Section("rtsp").Key("out_put_ip").MustString("localhost")
 	customPath := ""
 	if getServerType() == "flv" {
