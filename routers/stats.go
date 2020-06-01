@@ -62,7 +62,7 @@ func (h *APIHandler) Pushers(c *gin.Context) {
 
 	pushers := make([]interface{}, 0)
 	for _, stream := range streams {
-		var startAt string
+		startAt := "-"
 		statusText := "已停止"
 		rIPushers := rtsp.Instance.GetPushers()
 		for _, v := range rIPushers {
@@ -70,11 +70,11 @@ func (h *APIHandler) Pushers(c *gin.Context) {
 				if stream.Status {
 					if !v.Stoped {
 						statusText = "已启动"
+						startAt = stream.UpdatedAt.String()
 					}
+				} else {
+					startAt = "-"
 				}
-				startAt = stream.UpdatedAt.String()
-			} else {
-				startAt = "-"
 			}
 		}
 

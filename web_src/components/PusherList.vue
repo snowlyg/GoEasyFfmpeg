@@ -36,7 +36,7 @@
             </div>
             <div class="box-body">
                 <el-table :data="pushers" stripe class="view-list"
-                          :default-sort="{prop: 'startAt', order: 'descending'}" @sort-change="sortChange">
+                          :default-sort="{prop: 'Id', order: 'descending'}" @sort-change="sortChange">
                     <el-table-column prop="id" label="ID" min-width="60"></el-table-column>
                     <el-table-column label="播放地址" min-width="240" show-overflow-tooltip>
                         <template slot-scope="scope">
@@ -116,7 +116,7 @@
         data() {
             return {
                 q: "",
-                sort: "Id",
+                sort: "ID",
                 order: "descending",
                 pushers: [],
                 total: 0,
