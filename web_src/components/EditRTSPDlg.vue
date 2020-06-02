@@ -84,8 +84,6 @@ export default {
             if(data) {
                 Object.assign(this.form, data);
             }
-            console.log(data)
-            console.log(this.form)
             this.$refs['dlg'].show();
         }
     }

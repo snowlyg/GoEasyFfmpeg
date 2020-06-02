@@ -167,7 +167,6 @@ func getStream(formId string) models.Stream {
  * @apiUse simpleSuccess
  */
 func (h *APIHandler) StreamStart(c *gin.Context) {
-
 	type Form struct {
 		ID string `form:"id" binding:"required"`
 	}
@@ -231,11 +230,6 @@ func (h *APIHandler) StreamStartAll(c *gin.Context) {
 	ids := strings.Split(strings.Replace(form.Ids, "\"", "", -1), ",")
 	for _, id := range ids {
 		stream := getStream(id)
-
-		println("====================")
-		println(id)
-		println(stream.RoomName)
-		println("====================")
 		p := rtsp.GetServer().GetPusher(stream.CustomPath)
 		if p != nil {
 			rtsp.GetServer().RemovePusher(p)

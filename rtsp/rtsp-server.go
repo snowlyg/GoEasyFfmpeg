@@ -62,7 +62,7 @@ func (server *Server) Start() (err error) {
 
 					paramStr := utils.Conf().Section("rtsp").Key("decoder").MustString("-strict -2 -threads 2 -c:v copy -c:a copy -f rtsp")
 					paramsOfThisPath := strings.Split(paramStr, " ")
-					params := []string{"-rtsp_transport", "tcp", "-i", "\"" + pusher.Source + "\"", pusher.Path}
+					params := []string{"-rtsp_transport", "tcp", "-i", pusher.Source, pusher.Path}
 					params = append(params[:4], append(paramsOfThisPath, params[4:]...)...)
 
 					cmd := exec.Command(ffmpeg, params...)
@@ -75,7 +75,6 @@ func (server *Server) Start() (err error) {
 					if err != nil {
 						logger.Printf("Start ffmpeg err:%v", err)
 					}
-
 					pusher2FfmpegMap[pusher] = cmd
 					logger.Printf("add ffmpeg [%v] to pull stream from pusher[%v]", cmd, pusher)
 

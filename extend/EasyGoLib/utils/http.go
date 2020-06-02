@@ -7,7 +7,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"path"
 	"strings"
+	"time"
 )
 
 func GetRequestHref(r *http.Request) string {
@@ -53,9 +55,18 @@ func GetHttpCustomPath(roomName string) (string, error) {
 	} else if getServerType() == "rtsp" {
 		customPath = fmt.Sprintf("rtsp://%s:8554/%s", outputIp, roomName)
 		return customPath, nil
+	} else if getServerType() == "hls" {
+		m3u8DirPath := Conf().Section("rtsp").Key("m3u8_dir_path").MustString("")
+		m3u8DirPath = strings.TrimRight(strings.Replace(m3u8DirPath, "\\", "/", -1), "/")
+		dir := path.Join(m3u8DirPath, roomName, time.Now().Format("20060102"))
+		err := EnsureDir(dir)
+		if err != nil {
+			return "", err
+		}
+		customPath = path.Join(dir, fmt.Sprintf("out.m3u8"))
+		return customPath, nil
 	} else {
 		return "", errors.New("错误推流服务类型")
-
 	}
 }
 
