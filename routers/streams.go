@@ -99,8 +99,10 @@ func (h *APIHandler) StreamStop(c *gin.Context) {
 	db.SQLite.Save(stream)
 	if !stream.Status {
 		pusher := rtsp.GetServer().GetPusher(stream.CustomPath)
-		pusher.Stoped = true
-		rtsp.GetServer().RemovePusher(pusher)
+		if pusher != nil {
+			pusher.Stoped = true
+			rtsp.GetServer().RemovePusher(pusher)
+		}
 		c.IndentedJSON(200, "OK")
 		log.Printf("Stop %v success ", stream.URL)
 		return
@@ -143,7 +145,6 @@ func (h *APIHandler) StreamStopAll(c *gin.Context) {
 			} else {
 				continue
 			}
-
 		}
 	}
 

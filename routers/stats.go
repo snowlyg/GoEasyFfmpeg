@@ -80,8 +80,8 @@ func (h *APIHandler) Pushers(c *gin.Context) {
 
 		pushers = append(pushers, map[string]interface{}{
 			"id":        stream.ID,
-			"url":       utils.GetOutPutUrl(stream.RoomName, stream.TransType), //  播放地址
-			"source":    stream.URL,                                            // 源地址
+			"url":       utils.GetOutPutUrl(stream.RoomName, stream.TransType, stream.CustomPath), //  播放地址
+			"source":    stream.URL,                                                               // 源地址
 			"transType": stream.TransType,
 			"startAt":   startAt,
 			"roomName":  stream.RoomName,
