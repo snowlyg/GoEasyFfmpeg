@@ -56,14 +56,7 @@ func GetHttpCustomPath(roomName string) (string, error) {
 		customPath = fmt.Sprintf("rtsp://%s:8554/%s", outputIp, roomName)
 		return customPath, nil
 	} else if getServerType() == "hls" {
-		m3u8DirPath := Conf().Section("rtsp").Key("m3u8_dir_path").MustString("")
-		m3u8DirPath = strings.TrimRight(strings.Replace(m3u8DirPath, "\\", "/", -1), "/")
-		dir := path.Join(m3u8DirPath, roomName, time.Now().Format("20060102"))
-		err := EnsureDir(dir)
-		if err != nil {
-			return "", err
-		}
-		customPath = path.Join(dir, fmt.Sprintf("out.m3u8"))
+		customPath := path.Join(roomName, time.Now().Format("20060102"))
 		return customPath, nil
 	} else {
 		return "", errors.New("错误推流服务类型")
@@ -77,7 +70,7 @@ func getServerType() string {
 	return serverType
 }
 
-func GetOutPutUrl(roomName, transType string) string {
+func GetOutPutUrl(roomName, transType, customPath string) string {
 	outputIp := Conf().Section("rtsp").Key("out_put_ip").MustString("localhost")
 	url := fmt.Sprintf("rtsp://%s:8554/%v", outputIp, roomName)
 	if getServerType() == "flv" {
@@ -92,8 +85,10 @@ func GetOutPutUrl(roomName, transType string) string {
 	} else if getServerType() == "rtsp" {
 		url = fmt.Sprintf("rtsp://%s:8554/%v", outputIp, roomName)
 		return url
+	} else if getServerType() == "hls" {
+		url = path.Join(fmt.Sprintf("http://%s:10008/record", outputIp), customPath, fmt.Sprintf("out.m3u8"))
+		return url
 	} else {
-
 		return ""
 	}
 }

@@ -60,9 +60,20 @@ func (server *Server) Start() (err error) {
 						continue
 					}
 
+					m3u8DirPath := utils.Conf().Section("rtsp").Key("m3u8_dir_path").MustString("")
+					m3u8DirPath = strings.TrimRight(strings.Replace(m3u8DirPath, "\\", "/", -1), "/")
+					pusherPath := path.Join(m3u8DirPath, pusher.Path)
+					err = utils.EnsureDir(pusherPath)
+					if err != nil {
+						logger.Printf("EnsureDir:[%s] err:%v.", dir, err)
+						continue
+					}
+					pusherPath = path.Join(pusherPath, fmt.Sprintf("out.m3u8"))
+
 					paramStr := utils.Conf().Section("rtsp").Key("decoder").MustString("-strict -2 -threads 2 -c:v copy -c:a copy -f rtsp")
 					paramsOfThisPath := strings.Split(paramStr, " ")
-					params := []string{"-rtsp_transport", "tcp", "-i", pusher.Source, pusher.Path}
+
+					params := []string{"-rtsp_transport", "tcp", "-i", pusher.Source, pusherPath}
 					params = append(params[:4], append(paramsOfThisPath, params[4:]...)...)
 
 					cmd := exec.Command(ffmpeg, params...)
