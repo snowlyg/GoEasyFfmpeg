@@ -3,8 +3,8 @@ package routers
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/snowlyg/GoEasyFfmpeg/extend/EasyGoLib/db"
-	"github.com/snowlyg/GoEasyFfmpeg/extend/EasyGoLib/utils"
+	"github.com/snowlyg/GoEasyFfmpeg/extend/db"
+	"github.com/snowlyg/GoEasyFfmpeg/extend/utils"
 	"github.com/snowlyg/GoEasyFfmpeg/models"
 	"github.com/snowlyg/GoEasyFfmpeg/rtsp"
 	"log"
@@ -142,14 +142,16 @@ func (h *APIHandler) StreamStopAll(c *gin.Context) {
 			if pusher != nil {
 				pusher.Stoped = true
 				rtsp.GetServer().RemovePusher(pusher)
+				log.Printf("Stop success %v ", stream.ID)
 			} else {
+				log.Printf("Stop error %v ", stream.ID)
 				continue
 			}
 		}
 	}
 
 	c.IndentedJSON(200, "OK")
-	log.Printf("Stop success ")
+
 	return
 }
 
@@ -250,6 +252,10 @@ func (h *APIHandler) StreamStartAll(c *gin.Context) {
 			pusher := rtsp.NewClientPusher(stream.ID, stream.URL, customPath)
 			pusher.Stoped = false
 			rtsp.GetServer().AddPusher(pusher)
+			log.Printf("Start success %v ", stream.ID)
+		} else {
+			log.Printf("Start error %v ", stream.ID)
+			continue
 		}
 	}
 

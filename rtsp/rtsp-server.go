@@ -2,7 +2,7 @@ package rtsp
 
 import (
 	"fmt"
-	"github.com/snowlyg/GoEasyFfmpeg/extend/EasyGoLib/utils"
+	"github.com/snowlyg/GoEasyFfmpeg/extend/utils"
 	"log"
 	"os"
 	"os/exec"
@@ -10,7 +10,6 @@ import (
 	"strings"
 	"sync"
 	"syscall"
-	"time"
 )
 
 type Server struct {
@@ -41,6 +40,7 @@ func (server *Server) Start() (err error) {
 	logger := server.logger
 	ffmpeg := utils.Conf().Section("rtsp").Key("ffmpeg_path").MustString("")
 	m3u8DirPath := utils.Conf().Section("rtsp").Key("m3u8_dir_path").MustString("")
+	m3u8DirPath = strings.TrimRight(strings.Replace(m3u8DirPath, "\\", "/", -1), "/")
 
 	go func() { // 保持到本地
 		pusher2FfmpegMap := make(map[*Pusher]*exec.Cmd)
@@ -53,23 +53,15 @@ func (server *Server) Start() (err error) {
 			select {
 			case pusher, addChnOk = <-server.addPusherCh:
 				if addChnOk {
-					dir := path.Join(m3u8DirPath, "logs", time.Now().Format("20060102"))
-					err := utils.EnsureDir(dir)
-					if err != nil {
-						logger.Printf("EnsureDir:[%s] err:%v.", dir, err)
-						continue
-					}
 
-					m3u8DirPath := utils.Conf().Section("rtsp").Key("m3u8_dir_path").MustString("")
-					m3u8DirPath = strings.TrimRight(strings.Replace(m3u8DirPath, "\\", "/", -1), "/")
 					pusherPath := path.Join(m3u8DirPath, pusher.Path)
 					err = utils.EnsureDir(pusherPath)
 					if err != nil {
-						logger.Printf("EnsureDir:[%s] err:%v.", dir, err)
+						logger.Printf("EnsureDir:[%s] err:%v.", pusherPath, err)
 						continue
 					}
-					pusherPath = path.Join(pusherPath, fmt.Sprintf("out.m3u8"))
 
+					pusherPath = path.Join(pusherPath, fmt.Sprintf("out.m3u8"))
 					paramStr := utils.Conf().Section("rtsp").Key("decoder").MustString("-strict -2 -threads 2 -c:v copy -c:a copy -f rtsp")
 					paramsOfThisPath := strings.Split(paramStr, " ")
 
@@ -77,7 +69,7 @@ func (server *Server) Start() (err error) {
 					params = append(params[:4], append(paramsOfThisPath, params[4:]...)...)
 
 					cmd := exec.Command(ffmpeg, params...)
-					f, err := os.OpenFile(path.Join(dir, fmt.Sprintf("log.txt")), os.O_RDWR|os.O_CREATE, 0755)
+					f, err := os.OpenFile(path.Join(m3u8DirPath, fmt.Sprintf("log.txt")), os.O_RDWR|os.O_CREATE, 0755)
 					if err == nil {
 						cmd.Stdout = f
 						cmd.Stderr = f

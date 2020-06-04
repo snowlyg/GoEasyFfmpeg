@@ -1,7 +1,7 @@
 package rtsp
 
 import (
-	"github.com/snowlyg/GoEasyFfmpeg/extend/EasyGoLib/utils"
+	"github.com/snowlyg/GoEasyFfmpeg/extend/utils"
 	"sync"
 )
 

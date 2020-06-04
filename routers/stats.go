@@ -1,13 +1,13 @@
 package routers
 
 import (
-	"github.com/snowlyg/GoEasyFfmpeg/extend/EasyGoLib/db"
+	"github.com/snowlyg/GoEasyFfmpeg/extend/db"
 	"github.com/snowlyg/GoEasyFfmpeg/models"
 	"log"
 	//"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/snowlyg/GoEasyFfmpeg/extend/EasyGoLib/utils"
+	"github.com/snowlyg/GoEasyFfmpeg/extend/utils"
 	"github.com/snowlyg/GoEasyFfmpeg/rtsp"
 )
 

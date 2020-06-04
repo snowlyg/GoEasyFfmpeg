@@ -2,8 +2,8 @@ package routers
 
 import (
 	"fmt"
-	"github.com/snowlyg/GoEasyFfmpeg/extend/EasyGoLib/db"
-	"github.com/snowlyg/GoEasyFfmpeg/extend/EasyGoLib/utils"
+	"github.com/snowlyg/GoEasyFfmpeg/extend/db"
+	"github.com/snowlyg/GoEasyFfmpeg/extend/utils"
 	"log"
 	"net/http"
 	"runtime"

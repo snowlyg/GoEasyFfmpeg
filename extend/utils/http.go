@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"path"
 	"strings"
-	"time"
 )
 
 func GetRequestHref(r *http.Request) string {
@@ -56,7 +55,7 @@ func GetHttpCustomPath(roomName string) (string, error) {
 		customPath = fmt.Sprintf("rtsp://%s:8554/%s", outputIp, roomName)
 		return customPath, nil
 	} else if getServerType() == "hls" {
-		customPath := path.Join(roomName, time.Now().Format("20060102"))
+		customPath = roomName
 		return customPath, nil
 	} else {
 		return "", errors.New("错误推流服务类型")
@@ -86,7 +85,7 @@ func GetOutPutUrl(roomName, transType, customPath string) string {
 		url = fmt.Sprintf("rtsp://%s:8554/%v", outputIp, roomName)
 		return url
 	} else if getServerType() == "hls" {
-		url = path.Join(fmt.Sprintf("http://%s:10008/record", outputIp), customPath, fmt.Sprintf("out.m3u8"))
+		url = "http://" + path.Join(fmt.Sprintf("%s:10008/record", outputIp), customPath, fmt.Sprintf("out.m3u8"))
 		return url
 	} else {
 		return ""

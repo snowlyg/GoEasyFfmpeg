@@ -1,6 +1,6 @@
 package routers
 
-import "github.com/snowlyg/GoEasyFfmpeg/extend/EasyGoLib/utils"
+import "github.com/snowlyg/GoEasyFfmpeg/extend/utils"
 
 var BuildVersion = "v9.0"
 var BuildDateTime = ""

@@ -9,11 +9,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/snowlyg/GoEasyFfmpeg/extend/EasyGoLib/db"
+	"github.com/snowlyg/GoEasyFfmpeg/extend/db"
 
 	figure "github.com/common-nighthawk/go-figure"
 	"github.com/kardianos/service"
-	"github.com/snowlyg/GoEasyFfmpeg/extend/EasyGoLib/utils"
+	"github.com/snowlyg/GoEasyFfmpeg/extend/utils"
 	"github.com/snowlyg/GoEasyFfmpeg/models"
 	"github.com/snowlyg/GoEasyFfmpeg/routers"
 	"github.com/snowlyg/GoEasyFfmpeg/rtsp"
