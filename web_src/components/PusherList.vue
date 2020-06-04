@@ -140,9 +140,9 @@
         },
         mounted() {
             this.$refs["q"].focus();
-            // this.timer = setInterval(() => {
+            this.timer = setInterval(() => {
             this.getPushers();
-            // }, 3000);
+            }, 3000);
         },
         watch: {
             q: function (newVal, oldVal) {
