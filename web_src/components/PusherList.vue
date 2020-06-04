@@ -20,8 +20,8 @@
                         <button type="button" class="btn btn-sm btn-success"
                                 @click.prevent="$refs['pullRTSPDlg'].show()"><i class="fa fa-plus"></i> 拉流分发
                         </button>
-                        <button type="button" class="btn btn-sm btn-warning" @click.prevent="startAll()">启动</button>
-                        <button type="button" class="btn btn-sm btn-danger" @click="stopAll()">停止</button>
+<!--                        <button type="button" class="btn btn-sm btn-warning" @click.prevent="startAll()">启动</button>-->
+<!--                        <button type="button" class="btn btn-sm btn-danger" @click="stopAll()">停止</button>-->
                     </div>
                     <div class="form-group pull-right">
                         <div class="input-group">
