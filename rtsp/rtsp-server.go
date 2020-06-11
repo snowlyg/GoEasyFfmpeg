@@ -72,11 +72,13 @@ func (server *Server) Start() (err error) {
 					}
 
 					cmd := exec.Command(ffmpeg, params...)
-					f, err := os.OpenFile(path.Join(m3u8DirPath, fmt.Sprintf("log.txt")), os.O_RDWR|os.O_CREATE, 0755)
+					f, err := os.OpenFile(path.Join(m3u8DirPath, fmt.Sprintf("%s_log.txt", pusherPath)), os.O_RDWR|os.O_CREATE, 0755)
 					if err == nil {
 						cmd.Stdout = f
 						cmd.Stderr = f
 					}
+					defer f.Close()
+
 					err = cmd.Start()
 					if err != nil {
 						logger.Printf("Start ffmpeg err:%v", err)
