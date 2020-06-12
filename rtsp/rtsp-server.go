@@ -64,11 +64,13 @@ func (server *Server) Start() (err error) {
 					pusherPath = path.Join(pusherPath, fmt.Sprintf("out.m3u8"))
 					paramStr := utils.Conf().Section("rtsp").Key("decoder").MustString("-strict -2 -threads 2 -c:v copy -c:a copy -f rtsp")
 					paramsOfThisPath := strings.Split(paramStr, " ")
-
-					params := []string{"-i", pusher.Source, pusherPath}
-					params = append(params[:6], append(paramsOfThisPath, params[6:]...)...)
+					var params []string
 					if !strings.Contains(pusher.Source, ".m3u8") {
-						params = append(params[0:], []string{"-rtsp_transport", "tcp", "-fflags", "+genpts"}...)
+						params = []string{"-rtsp_transport", "tcp", "-fflags", "+genpts", "-i", pusher.Source, pusherPath}
+						params = append(params[:6], append(paramsOfThisPath, params[6:]...)...)
+					} else {
+						params := []string{"-fflags", "+genpts", "-i", pusher.Source, pusherPath}
+						params = append(params[:6], append(paramsOfThisPath, params[6:]...)...)
 					}
 
 					cmd := exec.Command(ffmpeg, params...)
