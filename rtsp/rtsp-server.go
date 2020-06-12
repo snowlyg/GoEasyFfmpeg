@@ -66,9 +66,9 @@ func (server *Server) Start() (err error) {
 					paramsOfThisPath := strings.Split(paramStr, " ")
 
 					params := []string{"-i", pusher.Source, pusherPath}
-					params = append(params[:2], append(paramsOfThisPath, params[2:]...)...)
+					params = append(params[:6], append(paramsOfThisPath, params[6:]...)...)
 					if !strings.Contains(pusher.Source, ".m3u8") {
-						params = append(params[0:], []string{"-rtsp_transport", "tcp"}...)
+						params = append(params[0:], []string{"-rtsp_transport", "tcp", "-fflags", "+genpts"}...)
 					}
 
 					cmd := exec.Command(ffmpeg, params...)
