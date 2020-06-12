@@ -38,3 +38,8 @@ logger.Printf("delete ffmpeg from pull stream from pusher[%v]", pusher)
 - 然后使用 [livego](https://github.com/gwuhaolin/livego/blob/master/README_cn.md) 和 [https://github.com/aler9/rtsp-simple-server](https://github.com/aler9/rtsp-simple-server) 项目做推流的时候，出现 cpu 占用太高的问题。
 原因是 ffmpeg 推流如果转码的话需要大量的计算。如果同时推流两路信号基本就 80% 了不能满足需求。既然是转码的问题那么就不转码呗。设置 -c:v copy -c:a copy ,结果发现 rtmp 服务器不支持电信的音视频格式。
 最后只能换成 [https://github.com/aler9/rtsp-simple-server](https://github.com/aler9/rtsp-simple-server) 服务了，解决了音视频格式不支持问题。
+
+- 有些推流资源会报错 first pts value must be set
+![cctv7.png](cctv7.png)
+
+解决方式是增加 `-fflags +genpts`

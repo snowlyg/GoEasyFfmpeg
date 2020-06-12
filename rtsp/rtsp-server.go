@@ -70,7 +70,7 @@ func (server *Server) Start() (err error) {
 						params = append(params[:6], append(paramsOfThisPath, params[6:]...)...)
 					} else {
 						params := []string{"-fflags", "+genpts", "-i", pusher.Source, pusherPath}
-						params = append(params[:6], append(paramsOfThisPath, params[6:]...)...)
+						params = append(params[:4], append(paramsOfThisPath, params[4:]...)...)
 					}
 
 					cmd := exec.Command(ffmpeg, params...)
