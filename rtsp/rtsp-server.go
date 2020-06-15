@@ -74,13 +74,12 @@ func (server *Server) Start() (err error) {
 					}
 
 					cmd := exec.Command(ffmpeg, params...)
-					logpath := fmt.Sprintf("%s_log.txt", pusher.Path)
-					println(logpath)
-					f, err := os.OpenFile(path.Join(m3u8DirPath, logpath), os.O_RDWR|os.O_CREATE, 0755)
-					if err == nil {
-						cmd.Stdout = f
-						cmd.Stderr = f
-					}
+					//logpath := fmt.Sprintf("%s_log.txt", pusher.Path)
+					//f, err := os.OpenFile(path.Join(m3u8DirPath, logpath), os.O_RDWR|os.O_CREATE, 0755)
+					//if err == nil {
+					//	cmd.Stdout = f
+					//	cmd.Stderr = f
+					//}
 
 					err = cmd.Start()
 					if err != nil {
@@ -88,7 +87,7 @@ func (server *Server) Start() (err error) {
 					}
 					pusher2FfmpegMap[pusher] = cmd
 					logger.Printf("add ffmpeg [%v] to pull stream from pusher[%v]", cmd, pusher)
-					f.Close()
+					//f.Close()
 				} else {
 					logger.Printf("addPusherChan closed")
 				}
