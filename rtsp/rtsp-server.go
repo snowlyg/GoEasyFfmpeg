@@ -39,6 +39,7 @@ func GetServer() *Server {
 func (server *Server) Start() (err error) {
 	logger := server.logger
 	ffmpeg := utils.Conf().Section("rtsp").Key("ffmpeg_path").MustString("")
+	debugLogEnable := utils.Conf().Section("rtsp").Key("debug_log_enable").MustBool(false)
 	m3u8DirPath := utils.Conf().Section("rtsp").Key("m3u8_dir_path").MustString("")
 	m3u8DirPath = strings.TrimRight(strings.Replace(m3u8DirPath, "\\", "/", -1), "/")
 
@@ -74,12 +75,15 @@ func (server *Server) Start() (err error) {
 					}
 
 					cmd := exec.Command(ffmpeg, params...)
-					//logpath := fmt.Sprintf("%s_log.txt", pusher.Path)
-					//f, err := os.OpenFile(path.Join(m3u8DirPath, logpath), os.O_RDWR|os.O_CREATE, 0755)
-					//if err == nil {
-					//	cmd.Stdout = f
-					//	cmd.Stderr = f
-					//}
+
+					if debugLogEnable {
+						logpath := fmt.Sprintf("%s_log.txt", pusher.Path)
+						f, err := os.OpenFile(path.Join(m3u8DirPath, logpath), os.O_RDWR|os.O_CREATE, 0755)
+						if err == nil {
+							cmd.Stdout = f
+							cmd.Stderr = f
+						}
+					}
 
 					err = cmd.Start()
 					if err != nil {
