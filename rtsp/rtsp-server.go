@@ -1,15 +1,14 @@
 package rtsp
 
 import (
-	"fmt"
 	"github.com/snowlyg/GoEasyFfmpeg/extend/utils"
 	"log"
 	"os"
-	"os/exec"
 	"path"
 	"strings"
 	"sync"
-	"syscall"
+
+	"github.com/snowlyg/go_ffmpeg"
 )
 
 type Server struct {
@@ -38,13 +37,13 @@ func GetServer() *Server {
 // Start 启动
 func (server *Server) Start() (err error) {
 	logger := server.logger
-	ffmpeg := utils.Conf().Section("rtsp").Key("ffmpeg_path").MustString("")
-	debugLogEnable := utils.Conf().Section("rtsp").Key("debug_log_enable").MustBool(false)
+	//ffmpeg := utils.Conf().Section("rtsp").Key("ffmpeg_path").MustString("")
+	//debugLogEnable := utils.Conf().Section("rtsp").Key("debug_log_enable").MustBool(false)
 	m3u8DirPath := utils.Conf().Section("rtsp").Key("m3u8_dir_path").MustString("")
 	m3u8DirPath = strings.TrimRight(strings.Replace(m3u8DirPath, "\\", "/", -1), "/")
 
 	go func() { // 保持到本地
-		pusher2FfmpegMap := make(map[*Pusher]*exec.Cmd)
+		//pusher2FfmpegMap := make(map[*Pusher]*exec.Cmd)
 		logger.Printf("Prepare to save stream to local....")
 		defer logger.Printf("End save stream to local....")
 		var pusher *Pusher
@@ -62,61 +61,64 @@ func (server *Server) Start() (err error) {
 						continue
 					}
 
-					pusherPath = path.Join(pusherPath, fmt.Sprintf("out.m3u8"))
-					paramStr := utils.Conf().Section("rtsp").Key("decoder").MustString("-strict -2 -threads 2 -c:v copy -c:a copy -f rtsp")
-					paramsOfThisPath := strings.Split(paramStr, " ")
-					var params []string
-					if !strings.Contains(pusher.Source, ".m3u8") {
-						params = []string{"-rtsp_transport", "tcp", "-fflags", "+genpts", "-i", pusher.Source, pusherPath}
-						params = append(params[:6], append(paramsOfThisPath, params[6:]...)...)
-					} else {
-						params := []string{"-fflags", "+genpts", "-i", pusher.Source, pusherPath}
-						params = append(params[:4], append(paramsOfThisPath, params[4:]...)...)
-					}
+					//pusherPath = path.Join(pusherPath, fmt.Sprintf("out.m3u8"))
+					//paramStr := utils.Conf().Section("rtsp").Key("decoder").MustString("-strict -2 -threads 2 -c:v copy -c:a copy -f rtsp")
+					//paramsOfThisPath := strings.Split(paramStr, " ")
 
-					cmd := exec.Command(ffmpeg, params...)
-
-					if debugLogEnable {
-						logpath := fmt.Sprintf("%s_log.txt", pusher.Path)
-						f, err := os.OpenFile(path.Join(m3u8DirPath, logpath), os.O_RDWR|os.O_CREATE, 0755)
-						if err == nil {
-							cmd.Stdout = f
-							cmd.Stderr = f
-						}
-					}
-
-					err = cmd.Start()
-					if err != nil {
-						logger.Printf("Start ffmpeg err:%v", err)
-					}
-					pusher2FfmpegMap[pusher] = cmd
-					logger.Printf("add ffmpeg [%v] to pull stream from pusher[%v]", cmd, pusher)
+					go go_ffmpeg.ToHls(pusher.Source, pusherPath, "tcp")
+					//var params []string
+					//if !strings.Contains(pusher.Source, ".m3u8") {
+					//	params = []string{"-rtsp_transport", "tcp", "-fflags", "+genpts", "-i", pusher.Source, pusherPath}
+					//	params = append(params[:6], append(paramsOfThisPath, params[6:]...)...)
+					//} else {
+					//	params := []string{"-fflags", "+genpts", "-i", pusher.Source, pusherPath}
+					//	params = append(params[:4], append(paramsOfThisPath, params[4:]...)...)
+					//}
+					//
+					//
+					//cmd := exec.Command(ffmpeg, params...)
+					//
+					//if debugLogEnable {
+					//	logpath := fmt.Sprintf("%s_log.txt", pusher.Path)
+					//	f, err := os.OpenFile(path.Join(m3u8DirPath, logpath), os.O_RDWR|os.O_CREATE, 0755)
+					//	if err == nil {
+					//		cmd.Stdout = f
+					//		cmd.Stderr = f
+					//	}
+					//}
+					//
+					//err = cmd.Start()
+					//if err != nil {
+					//	logger.Printf("Start ffmpeg err:%v", err)
+					//}
+					//pusher2FfmpegMap[pusher] = cmd
+					//logger.Printf("add ffmpeg [%v] to pull stream from pusher[%v]", cmd, pusher)
 					//f.Close()
 				} else {
 					logger.Printf("addPusherChan closed")
 				}
 			case pusher, removeChnOk = <-server.removePusherCh:
 				if removeChnOk {
-					cmd := pusher2FfmpegMap[pusher]
-					proc := cmd.Process
-					if proc != nil {
-						logger.Printf("prepare to SIGTERM to process:%v", proc)
-						proc.Signal(syscall.SIGTERM)
-						proc.Wait()
-
-						logger.Printf("process:%v terminate.", proc)
-					}
-					delete(pusher2FfmpegMap, pusher)
-					logger.Printf("delete ffmpeg from pull stream from pusher[%v]", pusher)
+					//cmd := pusher2FfmpegMap[pusher]
+					//proc := cmd.Process
+					//if proc != nil {
+					//	logger.Printf("prepare to SIGTERM to process:%v", proc)
+					//	proc.Signal(syscall.SIGTERM)
+					//	proc.Wait()
+					//
+					//	logger.Printf("process:%v terminate.", proc)
+					//}
+					//delete(pusher2FfmpegMap, pusher)
+					//logger.Printf("delete ffmpeg from pull stream from pusher[%v]", pusher)
 				} else {
-					for _, cmd := range pusher2FfmpegMap {
-						proc := cmd.Process
-						if proc != nil {
-							logger.Printf("prepare to SIGTERM to process:%v", proc)
-							proc.Signal(syscall.SIGTERM)
-						}
-					}
-					pusher2FfmpegMap = make(map[*Pusher]*exec.Cmd)
+					//for _, cmd := range pusher2FfmpegMap {
+					//	proc := cmd.Process
+					//	if proc != nil {
+					//		logger.Printf("prepare to SIGTERM to process:%v", proc)
+					//		proc.Signal(syscall.SIGTERM)
+					//	}
+					//}
+					//pusher2FfmpegMap = make(map[*Pusher]*exec.Cmd)
 					logger.Printf("removePusherChan closed")
 				}
 			}
