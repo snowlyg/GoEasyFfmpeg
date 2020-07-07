@@ -39,5 +39,5 @@ ts_duration_second=6
 ;value为 ffmpeg 转码格式，比如可设置为 -strict -2 -threads 2 -c:v copy -c:a copy -f rtsp ，表示copy源格式；default 表示使用  -strict -2 -threads 2 -c:v copy -c:a copy -f rtsp 不转码。
 ;rtsp: -strict -2 -threads 2 -c:v copy -c:a copy -f rtsp
 ;flv:  -strict -2 -threads 2 -c:v copy -c:a copy -f flv
-;hls:  -strict -2 -threads 2 -c:v copy -c:a copy -hls_time 4 -hls_list_size 5 -hls_wrap 10 -video_track_timescale 15360 -avoid_negative_ts make_zero -f hls
-decoder= -strict -2 -threads 2 -c:v copy -c:a copy -hls_time 4 -hls_list_size 5 -hls_wrap 10 -video_track_timescale 15360 -avoid_negative_ts make_zero -f hls
+;hls:  -strict -2 -threads 2 -c:v copy -c:a copy -x264-params keyint=30:min-keyint=30:no-scenecut=1 -hls_playlist_type vod  -hls_time 1 -hls_list_size 5 -hls_wrap 10  -f hls
+decoder= -strict -2 -threads 2 -c:v copy -c:a copy -x264-params keyint=30:min-keyint=30:no-scenecut=1 -hls_playlist_type vod  -hls_time 1 -hls_list_size 5 -hls_wrap 10  -f hls
