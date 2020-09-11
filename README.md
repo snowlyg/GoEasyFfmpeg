@@ -43,3 +43,10 @@ logger.Printf("delete ffmpeg from pull stream from pusher[%v]", pusher)
 ![cctv7.png](cctv7.png)
 
 解决方式是增加 `-fflags +genpts`
+
+- 关于 FFmpeg 合并 HLS/m3u8 流 TS 切片时出现 Non-monotonous DTS in output stream 的问题
+[使用＃EXT-X-DISCONTINUITY-SEQUENCE下载ts流ffmpeg](https://stackoverflow.com/questions/49289394/downloading-ts-stream-with-ext-x-discontinuity-sequence-ffmpeg)
+
+[Trim video and concatenate using ffmpeg - getting “Non-monotonous DTS in output stream” errors](https://superuser.com/questions/1150276/trim-video-and-concatenate-using-ffmpeg-getting-non-monotonous-dts-in-output)
+
+[https://trac.ffmpeg.org/wiki/Concatenate](https://trac.ffmpeg.org/wiki/Concatenate)

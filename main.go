@@ -190,16 +190,19 @@ func main() {
 	}
 
 	httpPort := utils.Conf().Section("http").Key("port").MustInt(10008)
+
 	rtspServer := rtsp.GetServer()
 	p := &program{
 		httpPort:   httpPort,
 		rtspServer: rtspServer,
 	}
+
 	s, err := service.New(p, svcConfig)
 	if err != nil {
 		log.Println(err)
 		utils.PauseExit()
 	}
+
 	if len(tail) > 0 {
 		cmd := strings.ToLower(tail[0])
 		if cmd == "install" || cmd == "stop" || cmd == "start" || cmd == "uninstall" {
@@ -213,9 +216,11 @@ func main() {
 			return
 		}
 	}
+
 	figure.NewFigure("EasyDarwin", "", false).Print()
 	if err = s.Run(); err != nil {
 		log.Println(err)
 		utils.PauseExit()
 	}
+
 }
