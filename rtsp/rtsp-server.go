@@ -67,11 +67,11 @@ func (server *Server) Start() (err error) {
 					paramsOfThisPath := strings.Split(paramStr, " ")
 					var params []string
 					if !strings.Contains(pusher.Source, ".m3u8") {
-						params = []string{"-filter_complex", "setpts='(RTCTIME - RTCSTART) / (TB * 1000000)'", "-force_key_frames", "expr:gte(t,n_forced*1)", "-rtsp_transport", "tcp", "-fflags", "+genpts", "-i", pusher.Source, pusherPath}
-						params = append(params[:10], append(paramsOfThisPath, params[10:]...)...)
-					} else {
-						params := []string{"-filter_complex", "setpts='(RTCTIME - RTCSTART) / (TB * 1000000)'", "-force_key_frames", "expr:gte(t,n_forced*1)", "-fflags", "+genpts", "-i", pusher.Source, pusherPath}
+						params = []string{"-rtsp_transport", "tcp", "-fflags", "+genpts", "-i", pusher.Source, "-force_key_frames", "expr:gte(t,n_forced*1)", pusherPath}
 						params = append(params[:8], append(paramsOfThisPath, params[8:]...)...)
+					} else {
+						params := []string{"-fflags", "+genpts", "-i", pusher.Source, "-force_key_frames", "expr:gte(t,n_forced*1)", pusherPath}
+						params = append(params[:6], append(paramsOfThisPath, params[6:]...)...)
 					}
 
 					cmd := exec.Command(ffmpeg, params...)
