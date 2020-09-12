@@ -31,16 +31,6 @@ func NewClientPusher(id uint, source, path string) (pusher *Pusher) {
 	return
 }
 
-// NewPusher 新建推流器
-func NewPusher() (pusher *Pusher) {
-	pusher = &Pusher{
-		players: make(map[uint]*Player),
-		cond:    sync.NewCond(&sync.Mutex{}),
-	}
-
-	return
-}
-
 // Start 启动推流器
 func (pusher *Pusher) Start() {
 	for !pusher.Stoped {

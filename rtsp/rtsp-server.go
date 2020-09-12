@@ -14,8 +14,6 @@ import (
 
 type Server struct {
 	SessionLogger
-	//TCPListener    *net.TCPListener
-	//TCPPort        int
 	Stoped         bool
 	pushers        map[string]*Pusher // Path <-> Pusher
 	pushersLock    sync.RWMutex

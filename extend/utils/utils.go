@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"bytes"
 	"crypto/md5"
 	"encoding/gob"
 	"encoding/hex"
@@ -9,12 +8,9 @@ import (
 	"log"
 	"net"
 	"os"
-	"os/exec"
 	"os/user"
 	"path/filepath"
-	"runtime"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/eiannone/keyboard"
@@ -47,17 +43,6 @@ func CWD() string {
 		return ""
 	}
 	return filepath.Dir(path)
-}
-
-var workInDirLock sync.Mutex
-
-func WorkInDir(f func(), dir string) {
-	wd, _ := os.Getwd()
-	workInDirLock.Lock()
-	defer workInDirLock.Unlock()
-	os.Chdir(dir)
-	defer os.Chdir(wd)
-	f()
 }
 
 func EXEName() string {
@@ -154,23 +139,6 @@ func ReloadConf() *ini.File {
 	return conf
 }
 
-func SaveToConf(section string, kvmap map[string]string) error {
-	var _conf *ini.File
-	var err error
-	if _conf, err = ini.InsensitiveLoad(ConfFile()); err != nil {
-		if _conf, err = ini.LoadSources(ini.LoadOptions{Insensitive: true}, []byte("")); err != nil {
-			return err
-		}
-	}
-	sec := _conf.Section(section)
-	for k, v := range kvmap {
-		sec.Key(k).SetValue(v)
-	}
-	_conf.SaveTo(ConfFile())
-	conf = _conf
-	return nil
-}
-
 func ExpandHomeDir(path string) string {
 	if len(path) == 0 {
 		return path
@@ -201,31 +169,6 @@ func Exist(path string) bool {
 	return true
 }
 
-func DeepCopy(dst, src interface{}) error {
-	var buf bytes.Buffer
-	if err := gob.NewEncoder(&buf).Encode(src); err != nil {
-		return err
-	}
-	return gob.NewDecoder(bytes.NewBuffer(buf.Bytes())).Decode(dst)
-}
-
-func Open(url string) error {
-	var cmd string
-	var args []string
-
-	switch runtime.GOOS {
-	case "windows":
-		cmd = "cmd"
-		args = []string{"/c", "start"}
-	case "darwin":
-		cmd = "open"
-	default: // "linux", "freebsd", "openbsd", "netbsd"
-		cmd = "xdg-open"
-	}
-	args = append(args, url)
-	return exec.Command(cmd, args...).Start()
-}
-
 func ShortID() string {
 	return shortid.MustGenerate()
 }
@@ -234,11 +177,6 @@ func PauseExit() {
 	log.Println("Press any to exit")
 	keyboard.GetSingleKey()
 	os.Exit(0)
-}
-
-func PauseGo(msg ...interface{}) {
-	log.Println(msg...)
-	keyboard.GetSingleKey()
 }
 
 func IsPortInUse(port int) bool {

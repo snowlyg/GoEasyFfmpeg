@@ -7,18 +7,6 @@ import (
 	"path/filepath"
 )
 
-// Copy copies src to dest, doesn't matter if src is a directory or a file
-func Copy(src, dest string) error {
-	src = ExpandHomeDir(filepath.Clean(src))
-	dest = ExpandHomeDir(filepath.Clean(dest))
-
-	info, err := os.Stat(src)
-	if err != nil {
-		return err
-	}
-	return copy(src, dest, info)
-}
-
 // "info" must be given here, NOT nil.
 func copy(src, dest string, info os.FileInfo) error {
 	if info.IsDir() {
