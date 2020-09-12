@@ -26,11 +26,6 @@ const store = new Vuex.Store({
                 path: "/about",
                 icon: "support",
                 title: "版本信息"                
-            }, {
-                path: "/apidoc",
-                target: "blank",
-                icon: "book",
-                title: "接口文档"
             }
         ]
     },
