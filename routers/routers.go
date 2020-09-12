@@ -2,10 +2,12 @@ package routers
 
 import (
 	"fmt"
+	"html/template"
+	"io/ioutil"
 	"log"
 	"mime"
 	"net/http"
-	"path/filepath"
+	"strings"
 
 	"github.com/snowlyg/GoEasyFfmpeg/extend/db"
 
@@ -111,6 +113,11 @@ func Init() (err error) {
 	Router.Use(gin.Recovery())
 	Router.Use(Errors())
 	Router.Use(cors.Default())
+	t, err := loadTemplate()
+	if err != nil {
+		panic(err)
+	}
+	Router.SetHTMLTemplate(t)
 
 	store := sessions.NewGormStoreWithOptions(
 		db.SQLite, sessions.GormStoreOptions{
@@ -122,10 +129,10 @@ func Init() (err error) {
 	store.Options(sessions.Options{HttpOnly: true, MaxAge: tokenTimeout, Path: "/"})
 	sessionHandle := sessions.Sessions("token", store)
 
-	{
-		wwwDir := filepath.Join(utils.DataDir(), "www")
-		Router.Use(static.Serve("/", static.LocalFile(wwwDir, true)))
-	}
+	//{
+	//wwwDir := filepath.Join(utils.DataDir(), "www")
+	//Router.Use(static.Serve("/", static.LocalFile(wwwDir, true)))
+	//}
 
 	{
 		api := Router.Group("/api/v1").Use(sessionHandle)
@@ -162,4 +169,22 @@ func Init() (err error) {
 	}
 
 	return
+}
+
+func loadTemplate() (*template.Template, error) {
+	t := template.New("")
+	for name, file := range Assets.Files {
+		if file.IsDir() || !strings.HasSuffix(name, ".html") {
+			continue
+		}
+		h, err := ioutil.ReadAll(file)
+		if err != nil {
+			return nil, err
+		}
+		t, err = t.New(name).Parse(string(h))
+		if err != nil {
+			return nil, err
+		}
+	}
+	return t, nil
 }

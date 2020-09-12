@@ -22,6 +22,9 @@ require (
 	github.com/imdario/mergo v0.3.11 // indirect
 	github.com/issue9/term v1.1.0 // indirect
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869 // indirect
+	github.com/jessevdk/go-assets v0.0.0-20160921144138-4f4301a06e15
+	github.com/jessevdk/go-assets-builder v0.0.0-20130903091706-b8483521738f // indirect
+	github.com/jessevdk/go-flags v1.4.0 // indirect
 	github.com/jinzhu/gorm v1.9.12
 	github.com/jonboulle/clockwork v0.1.0 // indirect
 	github.com/kardianos/service v1.0.0
