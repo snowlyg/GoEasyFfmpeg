@@ -50,3 +50,8 @@ logger.Printf("delete ffmpeg from pull stream from pusher[%v]", pusher)
 [Trim video and concatenate using ffmpeg - getting “Non-monotonous DTS in output stream” errors](https://superuser.com/questions/1150276/trim-video-and-concatenate-using-ffmpeg-getting-non-monotonous-dts-in-output)
 
 [https://trac.ffmpeg.org/wiki/Concatenate](https://trac.ffmpeg.org/wiki/Concatenate)
+
+// 打包前端代码
+```shell script
+go-assets-builder www -p routers -o ./routers/assets.go
+```
