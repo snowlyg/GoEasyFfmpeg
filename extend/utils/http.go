@@ -86,7 +86,7 @@ func GetOutPutUrl(roomName, transType, customPath string) string {
 		url = fmt.Sprintf("rtsp://%s:8554/%v", outputIp, roomName)
 		return url
 	} else if getServerType() == "hls" {
-		if !strings.Contains(".com", outputIp) {
+		if !strings.Contains(outputIp, ".com") {
 			outputIp = fmt.Sprintf(fmt.Sprintf("%s:%d", outputIp, httpPort))
 		}
 		url = "http://" + path.Join(fmt.Sprintf("%s/record", outputIp), customPath, fmt.Sprintf("out.m3u8"))
