@@ -64,7 +64,7 @@ func (server *Server) Start() (err error) {
 					paramStr := utils.Conf().Section("rtsp").Key("decoder").MustString("-strict -2 -threads 2 -c:v copy -c:a copy -f rtsp")
 					paramsOfThisPath := strings.Split(paramStr, " ")
 					var params []string
-					if !strings.Contains(pusher.Source, ".m3u8") || strings.Contains(pusher.Source, "rtmp") {
+					if !strings.Contains(pusher.Source, ".m3u8") || !strings.Contains(pusher.Source, "rtmp") {
 						params = []string{"-rtsp_transport", "tcp", "-fflags", "+genpts", "-i", pusher.Source, "-force_key_frames", "expr:gte(t,n_forced*1)", pusherPath}
 						params = append(params[:8], append(paramsOfThisPath, params[8:]...)...)
 					} else {
