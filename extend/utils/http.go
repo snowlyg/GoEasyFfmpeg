@@ -71,6 +71,7 @@ func getServerType() string {
 
 func GetOutPutUrl(roomName, transType, customPath string) string {
 	outputIp := Conf().Section("rtsp").Key("out_put_ip").MustString("localhost")
+	httpPort := Conf().Section("http").Key("port").MustInt(10008)
 	url := fmt.Sprintf("rtsp://%s:8554/%v", outputIp, roomName)
 	if getServerType() == "flv" {
 		if transType == "RTMP" {
@@ -85,7 +86,10 @@ func GetOutPutUrl(roomName, transType, customPath string) string {
 		url = fmt.Sprintf("rtsp://%s:8554/%v", outputIp, roomName)
 		return url
 	} else if getServerType() == "hls" {
-		url = "http://" + path.Join(fmt.Sprintf("%s:10008/record", outputIp), customPath, fmt.Sprintf("out.m3u8"))
+		if !strings.Contains(".com", outputIp) {
+			outputIp = fmt.Sprintf(fmt.Sprintf("%s:%d", outputIp, httpPort))
+		}
+		url = "http://" + path.Join(fmt.Sprintf("%s/record", outputIp), customPath, fmt.Sprintf("out.m3u8"))
 		return url
 	} else {
 		return ""
